@@ -1,0 +1,8 @@
+<resources>
+    <string name="app_name">Bakudapa Adventure</string>
+    <string name="login_title">Welcome Back</string>
+    <string name="login_button">Login</string>
+    <string name="signup_title">Create Account</string>
+    <string name="signup_button">Sign Up</string>
+    <string name="home_title">Home</string>
+</resources>
