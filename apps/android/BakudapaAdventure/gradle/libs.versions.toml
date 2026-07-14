@@ -44,7 +44,7 @@ google-accompanist-permissions = { group = "com.google.accompanist", name = "acc
 google-play-services-location = { group = "com.google.android.gms", name = "play-services-location", version = "21.3.0" }
 kotlinx-serialization-json = { group = "org.jetbrains.kotlinx", name = "kotlinx-serialization-json", version = "1.11.0" }
 kotlinx-coroutines-android = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-android", version = "1.11.0" }
-retrofit = { group = "com.squareup.retrofit2", name = "retrofit", version = "2.11.0" }
+retrofit = { group = "com.squareup.retrofit2", name = "retrofit", version = "3.0.0" }
 okhttp = { group = "com.squareup.okhttp3", name = "okhttp", version = "4.12.0" }
 retrofit-kotlinx-serialization-converter = { group = "com.jakewharton.retrofit", name = "retrofit2-kotlinx-serialization-converter", version = "1.0.0" }
 
