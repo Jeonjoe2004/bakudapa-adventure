@@ -8,11 +8,14 @@ import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.unit.dp
+import androidx.compose.ui.res.stringResource
 import androidx.hilt.navigation.compose.hiltViewModel
+import com.bakudapa.adventure.R
+import com.bakudapa.adventure.core.ui.components.HandlePermissions
+import com.bakudapa.adventure.core.utils.PermissionUtils
 import com.bakudapa.adventure.feature.map.ui.components.MountainMap
 
-@OptIn(Material3Api::class)
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MapScreen(
     onNavigateBack: () -> Unit,
@@ -20,6 +23,22 @@ fun MapScreen(
 ) {
     val state by viewModel.uiState.collectAsState()
 
+    HandlePermissions(
+        permissions = PermissionUtils.locationPermissions.toList(),
+        rationaleMessage = stringResource(R.string.permission_location_rationale),
+        onPermissionGranted = {
+            MapContent(state, onNavigateBack, viewModel)
+        }
+    )
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun MapContent(
+    state: MapState,
+    onNavigateBack: () -> Unit,
+    viewModel: MapViewModel
+) {
     Scaffold(
         topBar = {
             TopAppBar(
@@ -58,3 +77,4 @@ fun MapScreen(
         }
     }
 }
+

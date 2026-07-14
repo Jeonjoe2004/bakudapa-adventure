@@ -23,9 +23,10 @@ class TrackingViewModel @Inject constructor(
             combine(
                 repository.trackingStatus,
                 repository.currentRoute
-            ) { status, route ->
-                setState { it.copy(status = status, currentRoute = route) }
-            }.collect {}
+            ) { status, route -> Pair(status, route) }
+                .collect { (status, route) ->
+                    setState { it.copy(status = status, currentRoute = route) }
+                }
         }
     }
 

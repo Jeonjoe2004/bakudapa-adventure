@@ -1,0 +1,30 @@
+# OS
+Thumbs.db
+.DS_Store
+
+# IDE
+.idea/
+*.iml
+.vscode/
+
+# Android
+apps/android/BakudapaAdventure/.gradle/
+apps/android/BakudapaAdventure/build/
+apps/android/BakudapaAdventure/app/build/
+apps/android/BakudapaAdventure/local.properties
+apps/android/BakudapaAdventure/app/google-services.json
+
+# iOS
+apps/ios/**/xcworkspace/
+apps/ios/**/*.xcuserdata
+apps/ios/BakudapaAdventure/GoogleService-Info.plist
+
+# Admin Web
+apps/admin-web/node_modules/
+apps/admin-web/dist/
+
+# Firebase
+bakudapa-adventure-firebase-adminsdk*.json
+
+# Node
+node_modules/

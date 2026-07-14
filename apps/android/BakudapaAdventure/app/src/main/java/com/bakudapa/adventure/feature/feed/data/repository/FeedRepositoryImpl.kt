@@ -90,8 +90,15 @@ class FeedRepositoryImpl @Inject constructor(
     override suspend fun likePost(postId: String): DataResult<Unit> {
         return try {
             val userId = auth.currentUser?.uid ?: throw Exception("User not authenticated")
-            // Simplified: Increment likesCount and add to likedBy list (or separate collection)
-            // Real implementation would use a transaction
+            val postRef = firestoreManager.getCollection("posts").document(postId)
+            val likeRef = postRef.collection("likes").document(userId)
+            // Gunakan batch write: tambah like doc + increment counter
+            firestoreManager.getFirestore().runTransaction { transaction ->
+                val snap = transaction.get(postRef)
+                val current = snap.getLong("likesCount") ?: 0L
+                transaction.set(likeRef, mapOf("userId" to userId, "timestamp" to System.currentTimeMillis()))
+                transaction.update(postRef, "likesCount", current + 1)
+            }.await()
             DataResult.Success(Unit)
         } catch (e: Exception) {
             DataResult.Error(e)
@@ -100,6 +107,15 @@ class FeedRepositoryImpl @Inject constructor(
 
     override suspend fun unlikePost(postId: String): DataResult<Unit> {
         return try {
+            val userId = auth.currentUser?.uid ?: throw Exception("User not authenticated")
+            val postRef = firestoreManager.getCollection("posts").document(postId)
+            val likeRef = postRef.collection("likes").document(userId)
+            firestoreManager.getFirestore().runTransaction { transaction ->
+                val snap = transaction.get(postRef)
+                val current = snap.getLong("likesCount") ?: 1L
+                transaction.delete(likeRef)
+                transaction.update(postRef, "likesCount", maxOf(0, current - 1))
+            }.await()
             DataResult.Success(Unit)
         } catch (e: Exception) {
             DataResult.Error(e)
@@ -108,6 +124,12 @@ class FeedRepositoryImpl @Inject constructor(
 
     override suspend fun savePost(postId: String): DataResult<Unit> {
         return try {
+            val userId = auth.currentUser?.uid ?: throw Exception("User not authenticated")
+            firestoreManager.getCollection("users").document(userId)
+                .collection("savedPosts")
+                .document(postId)
+                .set(mapOf("postId" to postId, "savedAt" to System.currentTimeMillis()))
+                .await()
             DataResult.Success(Unit)
         } catch (e: Exception) {
             DataResult.Error(e)
@@ -116,6 +138,12 @@ class FeedRepositoryImpl @Inject constructor(
 
     override suspend fun unsavePost(postId: String): DataResult<Unit> {
         return try {
+            val userId = auth.currentUser?.uid ?: throw Exception("User not authenticated")
+            firestoreManager.getCollection("users").document(userId)
+                .collection("savedPosts")
+                .document(postId)
+                .delete()
+                .await()
             DataResult.Success(Unit)
         } catch (e: Exception) {
             DataResult.Error(e)

@@ -1,3 +1,14 @@
 <resources>
     <string name="app_name">Bakudapa Adventure</string>
+    <string name="login_title">Welcome Back</string>
+    <string name="login_button">Login</string>
+    <string name="signup_title">Create Account</string>
+    <string name="signup_button">Sign Up</string>
+    <string name="home_title">Home</string>
+    <string name="permission_required_title">Permission Required</string>
+    <string name="permission_location_rationale">Bakudapa Adventure needs access to your location to track your hike and show your position on the map.</string>
+    <string name="permission_camera_rationale">We need access to your camera so you can take and share photos of your adventure.</string>
+    <string name="permission_notification_rationale">Enable notifications to receive real-time chat messages and safety alerts from other adventurers.</string>
+    <string name="grant_button">Grant</string>
+    <string name="cancel_button">Cancel</string>
 </resources>

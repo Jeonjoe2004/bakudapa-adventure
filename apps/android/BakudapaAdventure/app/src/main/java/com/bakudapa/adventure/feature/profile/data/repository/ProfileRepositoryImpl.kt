@@ -10,6 +10,7 @@ import com.bakudapa.adventure.feature.tracking.data.local.HikingRouteDao
 import com.bakudapa.adventure.feature.tracking.domain.model.HikingRoute
 import com.bakudapa.adventure.feature.tracking.domain.model.TrackingPoint
 import com.google.firebase.auth.FirebaseAuth
+import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.tasks.await
 import javax.inject.Inject

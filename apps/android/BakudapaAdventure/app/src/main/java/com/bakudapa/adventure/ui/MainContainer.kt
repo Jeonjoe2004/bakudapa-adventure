@@ -1,5 +1,6 @@
 package com.bakudapa.adventure.ui
 
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Chat
@@ -11,22 +12,39 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
+import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavDestination.Companion.hierarchy
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import com.bakudapa.adventure.core.network.NetworkMonitor
+import com.bakudapa.adventure.core.ui.components.OfflineOverlay
 import com.bakudapa.adventure.navigation.NavGraph
 import com.bakudapa.adventure.navigation.Screen
+import com.google.firebase.auth.FirebaseAuth
+import dagger.hilt.android.lifecycle.HiltViewModel
+import javax.inject.Inject
+
+@HiltViewModel
+class MainViewModel @Inject constructor(
+    networkMonitor: NetworkMonitor
+) : ViewModel() {
+    val isOnline = networkMonitor.isOnline
+}
 
 @Composable
 fun MainContainer(
-    navController: NavHostController = rememberNavController()
+    navController: NavHostController = rememberNavController(),
+    auth: FirebaseAuth,
+    viewModel: MainViewModel = hiltViewModel()
 ) {
+    val isOnline by viewModel.isOnline.collectAsStateWithLifecycle(initialValue = true)
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val currentDestination = navBackStackEntry?.destination
     
-    // Define which screens should show the bottom bar
     val bottomBarScreens = listOf(
         Screen.Home,
         Screen.Map,
@@ -41,32 +59,36 @@ fun MainContainer(
 
     Scaffold(
         bottomBar = {
-            if (showBottomBar) {
-                NavigationBar {
-                    bottomBarItems.forEach { item ->
-                        val selected = currentDestination?.hierarchy?.any { it.route == item.screen.route } == true
-                        NavigationBarItem(
-                            icon = { Icon(item.icon, contentDescription = item.label) },
-                            label = { Text(item.label) },
-                            selected = selected,
-                            onClick = {
-                                navController.navigate(item.screen.route) {
-                                    popUpTo(navController.graph.findStartDestination().id) {
-                                        saveState = true
+            Column {
+                if (showBottomBar) {
+                    NavigationBar {
+                        bottomBarItems.forEach { item ->
+                            val selected = currentDestination?.hierarchy?.any { it.route == item.screen.route } == true
+                            NavigationBarItem(
+                                icon = { Icon(item.icon, contentDescription = item.label) },
+                                label = { Text(item.label) },
+                                selected = selected,
+                                onClick = {
+                                    navController.navigate(item.screen.route) {
+                                        popUpTo(navController.graph.findStartDestination().id) {
+                                            saveState = true
+                                        }
+                                        launchSingleTop = true
+                                        restoreState = true
                                     }
-                                    launchSingleTop = true
-                                    restoreState = true
                                 }
-                            }
-                        )
+                            )
+                        }
                     }
                 }
+                OfflineOverlay(isOnline = isOnline)
             }
         }
     ) { innerPadding ->
         NavGraph(
             navController = navController,
-            modifier = Modifier.padding(innerPadding)
+            modifier = Modifier.padding(innerPadding),
+            auth = auth
         )
     }
 }

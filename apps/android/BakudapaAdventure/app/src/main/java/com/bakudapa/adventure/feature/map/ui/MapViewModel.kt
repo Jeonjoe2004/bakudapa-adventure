@@ -2,14 +2,17 @@ package com.bakudapa.adventure.feature.map.ui
 
 import androidx.lifecycle.viewModelScope
 import com.bakudapa.adventure.core.base.BaseViewModel
-import com.bakudapa.adventure.feature.map.domain.model.MarkerType
+import com.bakudapa.adventure.core.data.DataResult
 import com.bakudapa.adventure.feature.map.domain.model.MapMarker
+import com.bakudapa.adventure.feature.map.domain.repository.MapRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
-class MapViewModel @Inject constructor() : BaseViewModel<MapState, MapEvent, MapEffect>(MapState()) {
+class MapViewModel @Inject constructor(
+    private val mapRepository: MapRepository
+) : BaseViewModel<MapState, MapEvent, MapEffect>(MapState()) {
 
     init {
         loadMarkers()
@@ -36,14 +39,13 @@ class MapViewModel @Inject constructor() : BaseViewModel<MapState, MapEvent, Map
 
     private fun loadMarkers() {
         viewModelScope.launch {
-            setState { it.copy(isLoading = true) }
-            // Mock markers for now
-            val mockMarkers = listOf(
-                MapMarker("1", "Klabat Summit", "Highest peak in North Sulawesi", 1.45, 125.0, MarkerType.SUMMIT, 1995),
-                MapMarker("2", "Lokon Crater", "Active volcano crater", 1.35, 124.8, MarkerType.DANGER_ZONE, 1580),
-                MapMarker("3", "Mahawu Camping", "Perfect spot for sunrise", 1.36, 124.9, MarkerType.CAMPING_GROUND, 1324)
-            )
-            setState { it.copy(markers = mockMarkers, isLoading = false) }
+            mapRepository.getMapMarkers().collect { result ->
+                when (result) {
+                    is DataResult.Success -> setState { it.copy(markers = result.data, isLoading = false) }
+                    is DataResult.Error -> setState { it.copy(isLoading = false) }
+                    DataResult.Loading -> setState { it.copy(isLoading = true) }
+                }
+            }
         }
     }
 }

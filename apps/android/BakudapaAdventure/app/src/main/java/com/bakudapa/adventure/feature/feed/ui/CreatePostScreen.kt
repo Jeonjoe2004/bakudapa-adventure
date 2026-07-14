@@ -54,7 +54,11 @@ fun CreatePostScreen(
                         modifier = Modifier.padding(end = 8.dp)
                     ) {
                         if (state.isCreatingPost) {
-                            CircularProgressIndicator(size = 18.dp, color = MaterialTheme.colorScheme.onPrimary)
+                            CircularProgressIndicator(
+                                modifier = Modifier.size(18.dp),
+                                color = MaterialTheme.colorScheme.onPrimary,
+                                strokeWidth = 2.dp
+                            )
                         } else {
                             Text("Post")
                         }

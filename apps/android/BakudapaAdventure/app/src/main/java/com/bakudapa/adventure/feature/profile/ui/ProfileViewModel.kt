@@ -25,41 +25,39 @@ class ProfileViewModel @Inject constructor(
             ProfileEvent.LoadProfile -> loadProfile()
             is ProfileEvent.OnTabSelected -> setState { it.copy(selectedTab = event.index) }
             ProfileEvent.OnEditProfileClicked -> sendEffect(ProfileEffect.NavigateToEditProfile)
+            ProfileEvent.OnSignOutClicked -> signOut()
         }
     }
 
     private fun loadProfile() {
         val userId = auth.currentUser?.uid ?: return
-        
         viewModelScope.launch {
             setState { it.copy(isLoading = true) }
-            
-            // Collect profile data
+
             launch {
                 repository.getUserProfile(userId).collectLatest { result ->
-                    if (result is DataResult.Success) {
-                        setState { it.copy(profile = result.data) }
+                    when (result) {
+                        is DataResult.Success -> setState { it.copy(profile = result.data, isLoading = false) }
+                        is DataResult.Error -> setState { it.copy(error = result.exception.message, isLoading = false) }
+                        DataResult.Loading -> setState { it.copy(isLoading = true) }
                     }
                 }
             }
-            
-            // Collect my posts
             launch {
                 repository.getMyPosts(userId).collectLatest { result ->
-                    if (result is DataResult.Success) {
-                        setState { it.copy(myPosts = result.data) }
-                    }
+                    if (result is DataResult.Success) setState { it.copy(myPosts = result.data) }
                 }
             }
-            
-            // Collect my routes
             launch {
                 repository.getMyRoutes(userId).collectLatest { result ->
-                    if (result is DataResult.Success) {
-                        setState { it.copy(myRoutes = result.data, isLoading = false) }
-                    }
+                    if (result is DataResult.Success) setState { it.copy(myRoutes = result.data) }
                 }
             }
         }
+    }
+
+    private fun signOut() {
+        auth.signOut()
+        sendEffect(ProfileEffect.NavigateToAuth)
     }
 }

@@ -12,6 +12,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.bakudapa.adventure.feature.feed.ui.components.PostItem
+import com.bakudapa.adventure.core.ui.components.EmptyState
+import androidx.compose.material.icons.filled.RssFeed
 import kotlinx.coroutines.flow.collectLatest
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -49,6 +51,14 @@ fun FeedScreen(
                 CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
             } else if (state.error != null && state.posts.isEmpty()) {
                 Text(text = "Error: ${state.error}", modifier = Modifier.align(Alignment.Center))
+            } else if (state.posts.isEmpty()) {
+                EmptyState(
+                    icon = Icons.Default.RssFeed,
+                    title = "No Posts Yet",
+                    description = "Be the first one to share your adventure with the community!",
+                    actionLabel = "Create Post",
+                    onActionClick = onNavigateToCreatePost
+                )
             } else {
                 LazyColumn(modifier = Modifier.fillMaxSize()) {
                     items(state.posts, key = { it.id }) { post ->
@@ -69,3 +79,4 @@ fun FeedScreen(
         }
     }
 }
+
