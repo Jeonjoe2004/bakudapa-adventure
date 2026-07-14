@@ -48,7 +48,7 @@ fun SectionHeader(
     }
 }
 
-@OptIn(Material3Api::class)
+
 @Composable
 fun MountainCard(
     mountain: Mountain,

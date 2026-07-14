@@ -42,6 +42,7 @@ fun ProfileScreen(
             when (effect) {
                 ProfileEffect.NavigateToEditProfile -> onNavigateToEditProfile()
                 ProfileEffect.NavigateToAuth -> onNavigateToAuth()
+                is ProfileEffect.ShowToast -> { /* Snackbar */ }
                 is ProfileEffect.ShowError -> { /* handled via UI */ }
             }
         }

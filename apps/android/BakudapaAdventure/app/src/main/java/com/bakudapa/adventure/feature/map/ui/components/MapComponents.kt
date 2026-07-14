@@ -12,12 +12,11 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import com.bakudapa.adventure.feature.map.domain.model.MapMarker
 import org.maplibre.android.MapLibre
-import org.maplibre.android.camera.CameraPosition
 import org.maplibre.android.geometry.LatLng
 import org.maplibre.android.maps.MapView
 import org.maplibre.android.maps.MapLibreMap
-import org.maplibre.android.maps.OnMapReadyCallback
 import org.maplibre.android.maps.Style
+import org.maplibre.android.camera.CameraUpdateFactory
 
 @Composable
 fun MountainMap(
@@ -27,92 +26,65 @@ fun MountainMap(
     modifier: Modifier = Modifier
 ) {
     val context = LocalContext.current
+    val markerMap = remember { mutableMapOf<String, String>() }
     var mapView by remember { mutableStateOf<MapView?>(null) }
-    var maplibreMap by remember { mutableStateOf<MapLibreMap?>(null) }
-    
-    // Initialize MapLibre if not already initialized
-    LaunchedEffect(Unit) {
-        if (!MapLibre.isInitialized()) {
-            MapLibre.getInstance(context)
-        }
-    }
-    
+
     Box(modifier = modifier) {
         AndroidView(
             factory = { ctx ->
-                MapView(ctx).apply {
-                    mapView = this
-                    getMapAsync(OnMapReadyCallback { map ->
-                        maplibreMap = map
-                        map.setStyle(Style.getPredefinedStyle("Outdoor")) { style ->
-                            // Clear existing markers
-                            map.markers?.forEach { map.removeMarker(it) }
-                            
-                            // Add markers from data
-                            markers.forEach { marker ->
-                                val markerOptions = org.maplibre.android.annotations.MarkerOptions()
+                MapView(ctx).also { mapView = it }.apply {
+                    getMapAsync { map ->
+                        map.setStyle(Style.Builder().fromUri("https://demotiles.maplibre.org/style.json")) {
+                            // Populate
+                        }
+                        markers.forEach { marker ->
+                            map.addMarker(
+                                org.maplibre.android.annotations.MarkerOptions()
                                     .position(LatLng(marker.latitude, marker.longitude))
                                     .title(marker.title)
                                     .snippet(marker.description)
-                                
-                                val mapMarker = map.addMarker(markerOptions)
-                                mapMarker.tag = marker.id // Store marker ID for click handling
-                            }
-                            
-                            // Set camera position
-                            val targetLatLng = if (markers.isNotEmpty()) {
-                                LatLng(markers.first().latitude, markers.first().longitude)
-                            } else {
-                                LatLng(1.45, 125.0) // Default to North Sulawesi
-                            }
-                            
-                            map.cameraPosition = CameraPosition.Builder()
-                                .target(targetLatLng)
-                                .zoom(10.0)
-                                .build()
+                            )
+                            markerMap[marker.title] = marker.id
                         }
-                    })
+                        map.moveCamera(CameraUpdateFactory.newLatLngZoom(
+                            LatLng(markers.firstOrNull()?.latitude ?: 1.45, markers.firstOrNull()?.longitude ?: 125.0),
+                            9.0
+                        ))
+                        map.setOnMarkerClickListener { clickedMarker ->
+                            val id = markerMap[clickedMarker.title]
+                            if (id != null) onMarkerClick(id)
+                            true
+                        }
+                    }
                 }
             },
             modifier = Modifier.fillMaxSize(),
             update = { view ->
-                // Update markers if markers list changes
-                maplibreMap?.let { map ->
-                    map.setStyle(Style.getPredefinedStyle("Outdoor")) { style ->
-                        // Clear existing markers
-                        map.markers?.forEach { map.removeMarker(it) }
-                        
-                        // Add new markers
-                        markers.forEach { marker ->
-                            val markerOptions = org.maplibre.android.annotations.MarkerOptions()
+                view.getMapAsync { map ->
+                    map.removeAnnotations()
+                    markers.forEach { marker ->
+                        map.addMarker(
+                            org.maplibre.android.annotations.MarkerOptions()
                                 .position(LatLng(marker.latitude, marker.longitude))
                                 .title(marker.title)
                                 .snippet(marker.description)
-                            
-                            val mapMarker = map.addMarker(markerOptions)
-                            mapMarker.tag = marker.id
-                        }
+                        )
+                        markerMap[marker.title] = marker.id
                     }
                 }
             }
         )
 
-        // Map Controls
         Column(
             modifier = Modifier
                 .align(Alignment.BottomEnd)
                 .padding(16.dp)
         ) {
             FloatingActionButton(
-                onClick = { 
-                    maplibreMap?.let { map ->
-                        userLocation?.let { (lat, lng) ->
-                            map.animateCamera(
-                                CameraPosition.Builder()
-                                    .target(LatLng(lat, lng))
-                                    .zoom(14.0)
-                                    .build()
-                            )
+                onClick = {
+                    userLocation?.let { (lat, lng) ->
+                        mapView?.getMapAsync { map ->
+                            map.animateCamera(CameraUpdateFactory.newLatLngZoom(LatLng(lat, lng), 14.0))
                         }
                     }
                 },

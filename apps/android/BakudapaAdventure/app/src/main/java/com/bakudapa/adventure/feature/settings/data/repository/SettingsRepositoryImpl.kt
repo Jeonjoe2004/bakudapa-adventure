@@ -7,6 +7,7 @@ import androidx.datastore.preferences.preferencesDataStore
 import com.bakudapa.adventure.core.data.DataResult
 import com.bakudapa.adventure.feature.settings.domain.model.AppSettings
 import com.bakudapa.adventure.feature.settings.domain.repository.SettingsRepository
+import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import javax.inject.Inject
@@ -16,7 +17,7 @@ private val Context.dataStore: DataStore<Preferences> by preferencesDataStore(na
 
 @Singleton
 class SettingsRepositoryImpl @Inject constructor(
-    private val context: Context
+    @ApplicationContext private val context: Context
 ) : SettingsRepository {
 
     private object Keys {

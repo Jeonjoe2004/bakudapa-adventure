@@ -79,7 +79,7 @@ fun MountainDetailScreen(
                             Box(
                                 modifier = Modifier
                                     .fillMaxSize()
-                                    .background(Color.Black.copy(alpha = 0.3))
+                                    .background(Color.Black.copy(alpha = 0.3f))
                             )
                             Column(
                                 modifier = Modifier.align(Alignment.BottomStart).padding(16.dp)

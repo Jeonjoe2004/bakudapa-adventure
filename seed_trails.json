@@ -9,9 +9,16 @@
     "imageUrl": "https://images.unsplash.com/photo-1464278533981-50106e6176b1?w=800",
     "popularity": 65,
     "description": "Jalur Airmadidi menuju puncak Klabat melalui perkebunan dan hutan tropis yang lebat. Butuh waktu sekitar 6 jam pendakian.",
-    "recommendedGear": ["Sepatu hiking", "Jas hujan", "Air minum 2L", "Makanan ringan", "Senter"],
-    "waterSources": ["Pos 2", "Pos 3 (musim hujan)"],
-    "campingSpots": ["Pos 3 - Basecamp akhir"],
+    "recommendedGear": ["Sepatu hiking", "Jas hujan", "Air minum 2L", "Makanan ringan", "Senter", "Tongkat hiking", "Obat pribadi"],
+    "waterSources": ["Pos 2 - Batu Perhentian", "Pos 3 (musim hujan)", "Basecamp Airmadidi"],
+    "campingSpots": ["Pos 3 - Camping Ground (1.500m)"],
+    "checkpoints": [
+      { "name": "Basecamp Airmadidi", "elevation": 750, "eta": "Start" },
+      { "name": "Pos 1", "elevation": 950, "eta": "1 jam" },
+      { "name": "Pos 2", "elevation": 1200, "eta": "2.5 jam" },
+      { "name": "Pos 3 - Camp", "elevation": 1500, "eta": "4 jam" },
+      { "name": "Puncak Klabat", "elevation": 1995, "eta": "6 jam" }
+    ],
     "elevationGain": 1200,
     "maxElevation": 1995,
     "createdAt": 1672531200000
@@ -26,9 +33,13 @@
     "imageUrl": "https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=800",
     "popularity": 75,
     "description": "Jalur pendakian singkat dari Kakaskasen menuju kawah Lokon. Cocok untuk pendaki pemula atau pemanasan.",
-    "recommendedGear": ["Sepatu olahraga", "Air minum 1L", "Masker (kawah berbau belerang)"],
-    "waterSources": [],
+    "recommendedGear": ["Sepatu olahraga", "Air minum 1L", "Masker (kawah berbau belerang)", "Jaket tipis"],
+    "waterSources": ["Basecamp Kakaskasen"],
     "campingSpots": [],
+    "checkpoints": [
+      { "name": "Basecamp Kakaskasen", "elevation": 1050, "eta": "Start" },
+      { "name": "Kawah Lokon", "elevation": 1580, "eta": "1.5 jam" }
+    ],
     "elevationGain": 400,
     "maxElevation": 1580,
     "createdAt": 1672531200000
@@ -43,9 +54,13 @@
     "imageUrl": "https://images.unsplash.com/photo-1544551763-46a013bb70d5?w=800",
     "popularity": 85,
     "description": "Jalur pendakian terpendek dan termudah. Hanya 30-45 menit sudah sampai puncak dengan pemandangan Kota Tomohon dan Danau Tondano.",
-    "recommendedGear": ["Jaket", "Air minum", "Kamera"],
-    "waterSources": [],
-    "campingSpots": ["Area kawah"],
+    "recommendedGear": ["Jaket", "Air minum", "Kamera", "Topi"],
+    "waterSources": ["Basecamp Rurukan"],
+    "campingSpots": ["Puncak Mahawu - Area kawah", "Bukit Doa"],
+    "checkpoints": [
+      { "name": "Basecamp Rurukan", "elevation": 1000, "eta": "Start" },
+      { "name": "Puncak Mahawu", "elevation": 1311, "eta": "45 min" }
+    ],
     "elevationGain": 300,
     "maxElevation": 1311,
     "createdAt": 1672531200000
@@ -60,9 +75,15 @@
     "imageUrl": "https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?w=800",
     "popularity": 45,
     "description": "Jalur dari Tombatu menuju puncak Soputan. Melewati hutan pegunungan dan medan berbatu. Perlu cek status aktivitas gunung.",
-    "recommendedGear": ["Sepatu hiking", "Jas hujan", "Air minum 3L", "Makanan", "Masker", "Helm"],
-    "waterSources": ["Pos 2"],
-    "campingSpots": ["Pos 3"],
+    "recommendedGear": ["Sepatu hiking", "Jas hujan", "Air minum 3L", "Makanan", "Masker", "Helm", "Sarung tangan"],
+    "waterSources": ["Pos 2 - Hutan Lindung", "Basecamp Tombatu"],
+    "campingSpots": ["Pos 3 - Camp Terakhir (1.300m)"],
+    "checkpoints": [
+      { "name": "Basecamp Tombatu", "elevation": 600, "eta": "Start" },
+      { "name": "Pos 2 - Hutan Lindung", "elevation": 950, "eta": "2 jam" },
+      { "name": "Pos 3 - Camp Terakhir", "elevation": 1300, "eta": "4 jam" },
+      { "name": "Puncak Soputan Mama", "elevation": 1784, "eta": "6 jam" }
+    ],
     "elevationGain": 1100,
     "maxElevation": 1784,
     "createdAt": 1672531200000
@@ -77,9 +98,14 @@
     "imageUrl": "https://images.unsplash.com/photo-1551632811-561732d1e306?w=800",
     "popularity": 35,
     "description": "Jalur dari Sinsingon melewati hutan lindung Ambang yang kaya akan flora langka seperti anggrek hutan.",
-    "recommendedGear": ["Sepatu hiking", "Jas hujan", "Air minum 2L", "Makanan", "Tongkat hiking"],
-    "waterSources": ["Sepanjang jalur"],
-    "campingSpots": ["Puncak"],
+    "recommendedGear": ["Sepatu hiking", "Jas hujan", "Air minum 2L", "Makanan", "Tongkat hiking", "Obat nyamuk"],
+    "waterSources": ["Hutan Lindung Ambang", "Sepanjang jalur"],
+    "campingSpots": ["Puncak Ambang (1.795m)"],
+    "checkpoints": [
+      { "name": "Basecamp Sinsingon", "elevation": 900, "eta": "Start" },
+      { "name": "Hutan Lindung Ambang", "elevation": 1100, "eta": "1.5 jam" },
+      { "name": "Puncak Ambang", "elevation": 1795, "eta": "5 jam" }
+    ],
     "elevationGain": 800,
     "maxElevation": 1795,
     "createdAt": 1672531200000
@@ -94,9 +120,14 @@
     "imageUrl": "https://images.unsplash.com/photo-1578662996442-48f60103fc96?w=800",
     "popularity": 40,
     "description": "Jalur dari Remboken menuju puncak Tampusu dengan padang rumput luas di atasnya. View Danau Tondano sangat memukau.",
-    "recommendedGear": ["Sepatu hiking", "Air minum 2L", "Makanan ringan", "Kamera", "Topi"],
-    "waterSources": ["Pos 1"],
-    "campingSpots": ["Puncak (area rumput)"],
+    "recommendedGear": ["Sepatu hiking", "Air minum 2L", "Makanan ringan", "Kamera", "Topi", "Jaket"],
+    "waterSources": ["Pos 1 - Sumber Air", "Basecamp Remboken"],
+    "campingSpots": ["Puncak Tampusu (padang rumput)"],
+    "checkpoints": [
+      { "name": "Basecamp Remboken", "elevation": 800, "eta": "Start" },
+      { "name": "Pos 1 - Air", "elevation": 950, "eta": "1 jam" },
+      { "name": "Puncak Tampusu", "elevation": 1200, "eta": "4 jam" }
+    ],
     "elevationGain": 600,
     "maxElevation": 1200,
     "createdAt": 1672531200000
@@ -111,9 +142,14 @@
     "imageUrl": "https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=800",
     "popularity": 70,
     "description": "Alternatif jalur Mahawu dari Rurukan melewati Bukit Doa. Pemandangan perbukitan dan perkebunan sayur yang hijau.",
-    "recommendedGear": ["Jaket", "Air minum", "Kamera", "Topi"],
+    "recommendedGear": ["Jaket", "Air minum", "Kamera", "Topi", "Snack"],
     "waterSources": ["Bukit Doa"],
-    "campingSpots": ["Bukit Doa"],
+    "campingSpots": ["Bukit Doa (area tenda)"],
+    "checkpoints": [
+      { "name": "Basecamp Rurukan", "elevation": 1000, "eta": "Start" },
+      { "name": "Bukit Doa", "elevation": 1150, "eta": "1 jam" },
+      { "name": "Puncak Mahawu", "elevation": 1311, "eta": "2 jam" }
+    ],
     "elevationGain": 500,
     "maxElevation": 1311,
     "createdAt": 1672531200000
@@ -128,9 +164,14 @@
     "imageUrl": "https://images.unsplash.com/photo-1491555103944-7c647fd857e6?w=800",
     "popularity": 60,
     "description": "Jalur alternatif dari Kakaskasen Tiga via Kelurahan Rike. Medan bervariasi dengan tanjakan yang lebih landai.",
-    "recommendedGear": ["Sepatu hiking", "Air minum 1.5L", "Masker"],
-    "waterSources": [],
+    "recommendedGear": ["Sepatu hiking", "Air minum 1.5L", "Masker", "Jaket"],
+    "waterSources": ["Kelurahan Rike"],
     "campingSpots": [],
+    "checkpoints": [
+      { "name": "Kakaskasen Tiga", "elevation": 1050, "eta": "Start" },
+      { "name": "Kelurahan Rike", "elevation": 1200, "eta": "1 jam" },
+      { "name": "Kawah Lokon", "elevation": 1580, "eta": "2.5 jam" }
+    ],
     "elevationGain": 450,
     "maxElevation": 1580,
     "createdAt": 1672531200000
@@ -162,9 +203,13 @@
     "imageUrl": "https://images.unsplash.com/photo-1491555103944-7c647fd857e6?w=800",
     "popularity": 55,
     "description": "Jalur dari Kakaskasen menuju kawah Empung. Trek melewati perkebunan warga dan hutan. Kawah hijau Kebun Raya Tomohon terlihat dari atas.",
-    "recommendedGear": ["Sepatu hiking", "Air minum 2L", "Masker", "Kamera"],
-    "waterSources": [],
-    "campingSpots": ["Kawah Empung"],
+    "recommendedGear": ["Sepatu hiking", "Air minum 2L", "Masker", "Kamera", "Jaket"],
+    "waterSources": ["Basecamp Kakaskasen"],
+    "campingSpots": ["Kawah Empung (area terbatas)"],
+    "checkpoints": [
+      { "name": "Basecamp Kakaskasen", "elevation": 1050, "eta": "Start" },
+      { "name": "Kawah Empung", "elevation": 1340, "eta": "3 jam" }
+    ],
     "elevationGain": 500,
     "maxElevation": 1340,
     "createdAt": 1672531200000
@@ -179,9 +224,14 @@
     "imageUrl": "https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?w=800",
     "popularity": 50,
     "description": "Jalur dari Ratahan menuju puncak Soputan Anak. Trek lebih pendek dan landai dibanding Soputan Mama, cocok untuk pendaki tingkat menengah.",
-    "recommendedGear": ["Sepatu hiking", "Air minum 2L", "Makanan ringan", "Jaket"],
-    "waterSources": ["Pos 1"],
-    "campingSpots": ["Puncak Soputan Anak"],
+    "recommendedGear": ["Sepatu hiking", "Air minum 2L", "Makanan ringan", "Jaket", "Topi"],
+    "waterSources": ["Pos 1 - Perkebunan", "Basecamp Ratahan"],
+    "campingSpots": ["Puncak Soputan Anak (1.500m)"],
+    "checkpoints": [
+      { "name": "Basecamp Ratahan", "elevation": 600, "eta": "Start" },
+      { "name": "Pos 1 - Perkebunan", "elevation": 900, "eta": "1.5 jam" },
+      { "name": "Puncak Soputan Anak", "elevation": 1500, "eta": "4 jam" }
+    ],
     "elevationGain": 700,
     "maxElevation": 1500,
     "createdAt": 1672531200000

@@ -69,7 +69,7 @@ fun TrailDetailScreen(
                                 modifier = Modifier.fillMaxSize(),
                                 contentScale = ContentScale.Crop
                             )
-                            Box(modifier = Modifier.fillMaxSize().background(Color.Black.copy(alpha = 0.25)))
+                            Box(modifier = Modifier.fillMaxSize().background(Color.Black.copy(alpha = 0.25f)))
                             Column(
                                 modifier = Modifier.align(Alignment.BottomStart).padding(16.dp)
                             ) {
@@ -156,7 +156,7 @@ fun TrailDetailScreen(
                             ListItem(
                                 headlineContent = { Text(trail.campingSpots[i]) },
                                 leadingContent = {
-                                    Icon(Icons.Default.Tent, contentDescription = null,
+                                    Icon(Icons.Default.Home, contentDescription = null,
                                         tint = MaterialTheme.colorScheme.primary)
                                 }
                             )

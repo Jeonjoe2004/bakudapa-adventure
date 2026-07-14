@@ -5,6 +5,7 @@ import Sidebar from './components/Sidebar'
 import LoginPage from './pages/LoginPage'
 import DashboardPage from './pages/DashboardPage'
 import MountainsPage from './pages/MountainsPage'
+import TrailsPage from './pages/TrailsPage'
 import UsersPage from './pages/UsersPage'
 
 function AdminLayout({ children }: { children: React.ReactNode }) {
@@ -26,6 +27,7 @@ export default function App() {
           <Route path="/login" element={<LoginPage />} />
           <Route path="/" element={<ProtectedRoute><AdminLayout><DashboardPage /></AdminLayout></ProtectedRoute>} />
           <Route path="/mountains" element={<ProtectedRoute><AdminLayout><MountainsPage /></AdminLayout></ProtectedRoute>} />
+          <Route path="/trails" element={<ProtectedRoute><AdminLayout><TrailsPage /></AdminLayout></ProtectedRoute>} />
           <Route path="/users" element={<ProtectedRoute><AdminLayout><UsersPage /></AdminLayout></ProtectedRoute>} />
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>

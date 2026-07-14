@@ -105,10 +105,11 @@ class TrackingRepositoryImpl @Inject constructor(
         }
     }
 
-    override fun getSavedRoutes(): Flow<DataResult<List<HikingRoute>>> =
-        hikingRouteDao.getAllRoutes().map { entities ->
-            DataResult.Success(entities.map { it.toDomain() })
-        }.catch { emit(DataResult.Error(it)) }
+    override fun getSavedRoutes(): Flow<DataResult<List<HikingRoute>>> {
+        return hikingRouteDao.getAllRoutes().map { entities ->
+            DataResult.Success<List<HikingRoute>>(entities.map { it.toDomain() })
+        } as Flow<DataResult<List<HikingRoute>>>
+    }
 
     override suspend fun exportToGpx(route: HikingRoute): DataResult<String> {
         return try {

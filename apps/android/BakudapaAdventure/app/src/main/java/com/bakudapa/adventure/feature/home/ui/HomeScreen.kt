@@ -13,6 +13,7 @@ import androidx.compose.material.icons.filled.Map
 import androidx.compose.material.icons.filled.Explore
 import androidx.compose.material.icons.filled.Group
 import androidx.compose.material3.*
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -23,7 +24,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import com.bakudapa.adventure.core.ui.components.ShimmerItem
 import com.bakudapa.adventure.feature.home.ui.components.*
 
-@OptIn(Material3Api::class)
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HomeScreen(
     onNavigateToMap: () -> Unit,

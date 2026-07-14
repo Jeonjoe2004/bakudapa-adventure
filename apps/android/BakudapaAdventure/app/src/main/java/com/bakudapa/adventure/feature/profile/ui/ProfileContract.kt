@@ -20,9 +20,12 @@ sealed class ProfileEvent : UiEvent {
     object LoadProfile : ProfileEvent()
     data class OnTabSelected(val index: Int) : ProfileEvent()
     object OnEditProfileClicked : ProfileEvent()
+    object OnSignOutClicked : ProfileEvent()
 }
 
 sealed class ProfileEffect : UiEffect {
     object NavigateToEditProfile : ProfileEffect()
+    object NavigateToAuth : ProfileEffect()
     data class ShowToast(val message: String) : ProfileEffect()
+    data class ShowError(val message: String) : ProfileEffect()
 }

@@ -2,23 +2,41 @@ import { useEffect, useState } from 'react'
 import { collection, getDocs } from 'firebase/firestore'
 import { db } from '../firebase'
 import { Mountain, Users, Map, TrendingUp } from 'lucide-react'
+import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts'
 
 interface Stats { totalMountains: number; totalUsers: number; totalTrails: number; activeToday: number }
+interface ChartData { name: string; elevation: number; trails: number }
 
 export default function DashboardPage() {
   const [stats, setStats] = useState<Stats | null>(null)
+  const [chartData, setChartData] = useState<ChartData[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
 
   useEffect(() => {
     ;(async () => {
       try {
-        const [mCount, uCount, tCount] = await Promise.all([
-          getDocs(collection(db, 'mountains')).then(s => s.size),
-          getDocs(collection(db, 'users')).then(s => s.size),
-          getDocs(collection(db, 'trails')).then(s => s.size),
+        const [mSnap, uSnap, tSnap] = await Promise.all([
+          getDocs(collection(db, 'mountains')),
+          getDocs(collection(db, 'users')),
+          getDocs(collection(db, 'trails')),
         ])
-        setStats({ totalMountains: mCount, totalUsers: uCount, totalTrails: tCount, activeToday: 0 })
+        setStats({
+          totalMountains: mSnap.size,
+          totalUsers: uSnap.size,
+          totalTrails: tSnap.size,
+          activeToday: 0,
+        })
+
+        const mountains = mSnap.docs.map(d => ({ id: d.id, ...d.data() }))
+        const trails = tSnap.docs.map(d => ({ ...d.data() }))
+
+        const data: ChartData[] = mountains.map((m: any) => ({
+          name: m.name?.replace('Mount ', '') || m.id,
+          elevation: m.elevation || 0,
+          trails: trails.filter((t: any) => t.mountainId === m.id || t.mountainName === m.name).length,
+        }))
+        setChartData(data.sort((a, b) => b.elevation - a.elevation))
       } catch (err: any) {
         setError(err.message)
       } finally {
@@ -51,6 +69,34 @@ export default function DashboardPage() {
           </div>
         ))}
       </div>
+
+      {chartData.length > 0 && (
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <div className="bg-white rounded-xl shadow-sm p-6">
+            <h2 className="font-semibold text-gray-700 mb-4">Elevation by Mountain (m)</h2>
+            <ResponsiveContainer width="100%" height={300}>
+              <BarChart data={chartData} margin={{ bottom: 40 }}>
+                <XAxis dataKey="name" angle={-30} textAnchor="end" tick={{ fontSize: 11 }} />
+                <YAxis />
+                <Tooltip />
+                <Bar dataKey="elevation" fill="#2E7D32" radius={[4, 4, 0, 0]} />
+              </BarChart>
+            </ResponsiveContainer>
+          </div>
+          <div className="bg-white rounded-xl shadow-sm p-6">
+            <h2 className="font-semibold text-gray-700 mb-4">Trails per Mountain</h2>
+            <ResponsiveContainer width="100%" height={300}>
+              <BarChart data={chartData} margin={{ bottom: 40 }}>
+                <XAxis dataKey="name" angle={-30} textAnchor="end" tick={{ fontSize: 11 }} />
+                <YAxis allowDecimals={false} />
+                <Tooltip />
+                <Bar dataKey="trails" fill="#FFA000" radius={[4, 4, 0, 0]} />
+              </BarChart>
+            </ResponsiveContainer>
+          </div>
+        </div>
+      )}
+
       <div className="bg-white rounded-xl shadow-sm p-6">
         <h2 className="font-semibold text-gray-700 mb-2">Recent Activity</h2>
         <p className="text-gray-400 text-sm">Coming soon — real-time activity feed.</p>
