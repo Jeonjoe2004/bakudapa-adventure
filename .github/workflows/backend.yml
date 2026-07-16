@@ -1,22 +1,22 @@
-name: Admin Web CI
+name: Backend CI
 
 on:
   push:
     branches: [main, develop]
     paths:
-      - 'apps/admin-web/**'
-      - '.github/workflows/admin-web.yml'
+      - 'backend/functions/**'
+      - '.github/workflows/backend.yml'
   pull_request:
     branches: [main]
     paths:
-      - 'apps/admin-web/**'
+      - 'backend/functions/**'
 
 defaults:
   run:
-    working-directory: apps/admin-web
+    working-directory: backend/functions
 
 jobs:
-  build:
+  build-and-test:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -24,14 +24,14 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: 22
           cache: npm
-          cache-dependency-path: apps/admin-web/package-lock.json
+          cache-dependency-path: backend/functions/package-lock.json
 
       - name: Install
         run: npm ci
 
-      - name: Lint
+      - name: Type check
         run: npx tsc --noEmit
 
       - name: Test
@@ -39,9 +39,3 @@ jobs:
 
       - name: Build
         run: npm run build
-
-      - name: Upload build
-        uses: actions/upload-artifact@v4
-        with:
-          name: admin-web-dist
-          path: apps/admin-web/dist/

@@ -14,6 +14,7 @@ struct MapView: View {
     @State private var route: [CLLocationCoordinate2D] = []
     @State private var timer: Timer?
     @State private var elapsed: TimeInterval = 0
+    @StateObject private var locationManager = TrackingLocationManager()
 
     enum TrackingState: Equatable { case idle, recording, paused }
 
@@ -47,7 +48,7 @@ struct MapView: View {
                     if tracking != .idle {
                         Text(elapsedString).font(.title3.monospacedDigit()).foregroundStyle(.secondary)
 
-                        Button(action: { tracking = .paused; timer?.invalidate() }) {
+                        Button(action: { tracking = .paused; timer?.invalidate(); locationManager.stopUpdating() }) {
                             Image(systemName: tracking == .paused ? "play.circle" : "pause.circle")
                                 .font(.title2)
                         }
@@ -58,6 +59,14 @@ struct MapView: View {
                 .background(.bar)
             }
             .navigationTitle("Map")
+            .onReceive(locationManager.$location) { loc in
+                guard let loc, tracking == .recording else { return }
+                route.append(loc.coordinate)
+                position = .region(MKCoordinateRegion(
+                    center: loc.coordinate,
+                    span: MKCoordinateSpan(latitudeDelta: 0.05, longitudeDelta: 0.05)
+                ))
+            }
         }
     }
 
@@ -74,6 +83,7 @@ struct MapView: View {
             tracking = .recording
             route = []
             elapsed = 0
+            locationManager.startUpdating()
             timer = Timer.scheduledTimer(withTimeInterval: 1, repeats: true) { _ in
                 elapsed += 1
             }
@@ -81,7 +91,32 @@ struct MapView: View {
             tracking = .idle
             timer?.invalidate()
             timer = nil
-            // Simpan rute di sini nanti
+            locationManager.stopUpdating()
         }
+    }
+}
+
+final class TrackingLocationManager: NSObject, ObservableObject, CLLocationManagerDelegate {
+    private let manager = CLLocationManager()
+    @Published var location: CLLocation?
+
+    override init() {
+        super.init()
+        manager.delegate = self
+        manager.desiredAccuracy = kCLLocationAccuracyBest
+        manager.activityType = .fitness
+        manager.distanceFilter = 10
+        manager.requestWhenInUseAuthorization()
+    }
+
+    func startUpdating() { manager.startUpdatingLocation() }
+    func stopUpdating() { manager.stopUpdatingLocation() }
+
+    func locationManager(_ manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
+        location = locations.last
+    }
+
+    func locationManager(_ manager: CLLocationManager, didFailWithError error: Error) {
+        print("Location error: \(error.localizedDescription)")
     }
 }
