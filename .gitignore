@@ -28,3 +28,4 @@ bakudapa-adventure-firebase-adminsdk*.json
 
 # Node
 node_modules/
+build/
