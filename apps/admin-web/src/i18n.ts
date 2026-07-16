@@ -1,0 +1,58 @@
+const translations: Record<string, Record<string, string>> = {
+  en: {
+    'dashboard': 'Dashboard',
+    'mountains': 'Mountains',
+    'trails': 'Trails',
+    'users': 'Users',
+    'posts': 'Posts',
+    'articles': 'Articles',
+    'poi': 'POI',
+    'pending': 'Pending Trails',
+    'reviews': 'Reviews',
+    'logout': 'Logout',
+    'save': 'Save',
+    'cancel': 'Cancel',
+    'delete': 'Delete',
+    'edit': 'Edit',
+    'create': 'Create',
+    'search': 'Search',
+    'loading': 'Loading...',
+    'no_data': 'No data',
+    'error_generic': 'Something went wrong',
+    'confirm_delete': 'Are you sure?',
+    'published': 'Published',
+    'draft': 'Draft',
+    'active_today': 'Active Today',
+  },
+  id: {
+    'dashboard': 'Dashboard',
+    'mountains': 'Gunung',
+    'trails': 'Jalur',
+    'users': 'Pengguna',
+    'posts': 'Postingan',
+    'articles': 'Artikel',
+    'poi': 'POI',
+    'pending': 'Jalur Tertunda',
+    'reviews': 'Ulasan',
+    'logout': 'Keluar',
+    'save': 'Simpan',
+    'cancel': 'Batal',
+    'delete': 'Hapus',
+    'edit': 'Ubah',
+    'create': 'Buat',
+    'search': 'Cari',
+    'loading': 'Memuat...',
+    'no_data': 'Tidak ada data',
+    'error_generic': 'Terjadi kesalahan',
+    'confirm_delete': 'Yakin ingin menghapus?',
+    'published': 'Terbit',
+    'draft': 'Draf',
+    'active_today': 'Aktif Hari Ini',
+  },
+}
+
+const lang = navigator.language.startsWith('id') ? 'id' : 'en'
+
+export function t(key: string): string {
+  return translations[lang]?.[key] ?? translations.en[key] ?? key
+}

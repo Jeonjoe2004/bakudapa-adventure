@@ -10,20 +10,25 @@ service firebase.storage {
       allow read: if true;
       allow write: if request.auth != null;
     }
-    // User avatars: owner write, public read
+    // User avatars: owner write & delete, authenticated read
     match /avatars/{userId}/{allPaths=**} {
-      allow read: if true;
+      allow read: if request.auth != null;
       allow write: if request.auth != null && request.auth.uid == userId;
       allow delete: if request.auth != null && request.auth.uid == userId;
     }
     // Posts images: owner write, authenticated read
     match /posts/{allPaths=**} {
       allow read: if request.auth != null;
+      allow create: if request.auth != null
+        && request.resource.size < 10 * 1024 * 1024;
       allow write: if request.auth != null;
     }
-    // Chat images: authenticated
+    // Chat images: authenticated with size limit
     match /chats/{allPaths=**} {
-      allow read, write: if request.auth != null;
+      allow read: if request.auth != null;
+      allow create: if request.auth != null
+        && request.resource.size < 10 * 1024 * 1024;
+      allow delete: if request.auth != null;
     }
     // Article images: admin write, authenticated read
     match /articles/{allPaths=**} {

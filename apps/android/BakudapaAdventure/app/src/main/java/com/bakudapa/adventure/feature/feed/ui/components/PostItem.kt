@@ -90,7 +90,7 @@ fun PostItem(
                         IconButton(onClick = onLikeClick) {
                             Icon(
                                 if (post.isLiked) Icons.Filled.Favorite else Icons.Outlined.FavoriteBorder,
-                                contentDescription = "Like",
+                                contentDescription = "Suka",
                                 tint = if (post.isLiked) MaterialTheme.colorScheme.error else LocalContentColor.current
                             )
                         }
@@ -98,7 +98,7 @@ fun PostItem(
                     }
                     Row(verticalAlignment = Alignment.CenterVertically) {
                         IconButton(onClick = onCommentClick) {
-                            Icon(Icons.Outlined.ChatBubbleOutline, contentDescription = "Comment")
+                            Icon(Icons.Outlined.ChatBubbleOutline, contentDescription = "Komentar")
                         }
                         Text(text = post.commentsCount.toString())
                     }

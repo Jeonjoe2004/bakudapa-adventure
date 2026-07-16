@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 80" fill="none">
+  <!-- Icon small -->
+  <circle cx="40" cy="40" r="30" fill="#2E7D32"/>
+  <polygon points="20,65 40,20 60,65" fill="white" fill-opacity="0.9"/>
+  <polygon points="30,65 45,35 60,65" fill="white" fill-opacity="0.6"/>
+  <circle cx="40" cy="26" r="6" fill="#FFA000"/>
+  <!-- Text -->
+  <text x="85" y="48" font-family="Inter, sans-serif" font-size="28" font-weight="700" fill="#2E7D32">Bakudapa</text>
+  <text x="85" y="68" font-family="Inter, sans-serif" font-size="14" font-weight="500" fill="#666">Adventure</text>
+</svg>

@@ -65,7 +65,7 @@ fun EmergencyScreen(
             icon = {
                 Icon(
                     Icons.Default.Warning,
-                    contentDescription = null,
+                    contentDescription = "Peringatan",
                     modifier = Modifier.size(48.dp),
                     tint = Color.Red
                 )
@@ -190,7 +190,7 @@ fun EmergencyScreen(
                         onClick = { showAddDialog = true },
                         modifier = Modifier.fillMaxWidth()
                     ) {
-                        Icon(Icons.Default.Add, contentDescription = null)
+                        Icon(Icons.Default.Add, contentDescription = "Tambah kontak")
                         Spacer(modifier = Modifier.width(8.dp))
                         Text("Add Emergency Contact")
                     }

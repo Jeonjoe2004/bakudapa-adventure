@@ -154,7 +154,7 @@ fun MountainDetailScreen(
                                     .fillMaxWidth()
                                     .padding(horizontal = 16.dp, vertical = 8.dp)
                             ) {
-                                Icon(Icons.Default.Map, contentDescription = null)
+                                Icon(Icons.Default.Map, contentDescription = "Lihat peta")
                                 Spacer(Modifier.width(8.dp))
                                 Text("View on Map")
                             }

@@ -1,0 +1,89 @@
+{
+  "sourceLanguage" : "en",
+  "strings" : {
+    "home" : {
+      "comment" : "Tab title",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Home" } },
+        "id" : { "stringUnit" : { "state" : "translated", "value" : "Beranda" } }
+      }
+    },
+    "map" : {
+      "comment" : "Tab title",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Map" } },
+        "id" : { "stringUnit" : { "state" : "translated", "value" : "Peta" } }
+      }
+    },
+    "feed" : {
+      "comment" : "Tab title",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Feed" } },
+        "id" : { "stringUnit" : { "state" : "translated", "value" : "Feed" } }
+      }
+    },
+    "chat" : {
+      "comment" : "Tab title",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Chat" } },
+        "id" : { "stringUnit" : { "state" : "translated", "value" : "Chat" } }
+      }
+    },
+    "profile" : {
+      "comment" : "Tab title",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Profile" } },
+        "id" : { "stringUnit" : { "state" : "translated", "value" : "Profil" } }
+      }
+    },
+    "Start" : {
+      "comment" : "Tracking button",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Start" } },
+        "id" : { "stringUnit" : { "state" : "translated", "value" : "Mulai" } }
+      }
+    },
+    "Stop" : {
+      "comment" : "Tracking button",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Stop" } },
+        "id" : { "stringUnit" : { "state" : "translated", "value" : "Berhenti" } }
+      }
+    },
+    "Pause" : {
+      "comment" : "Tracking button",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Pause" } },
+        "id" : { "stringUnit" : { "state" : "translated", "value" : "Jeda" } }
+      }
+    },
+    "Resume" : {
+      "comment" : "Tracking button",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Resume" } },
+        "id" : { "stringUnit" : { "state" : "translated", "value" : "Lanjut" } }
+      }
+    },
+    "settings" : {
+      "comment" : "Settings title",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Settings" } },
+        "id" : { "stringUnit" : { "state" : "translated", "value" : "Pengaturan" } }
+      }
+    },
+    "Loading..." : {
+      "comment" : "Loading state",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Loading..." } },
+        "id" : { "stringUnit" : { "state" : "translated", "value" : "Memuat..." } }
+      }
+    },
+    "Something went wrong" : {
+      "comment" : "Error state",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Something went wrong" } },
+        "id" : { "stringUnit" : { "state" : "translated", "value" : "Terjadi kesalahan" } }
+      }
+    }
+  }
+}
