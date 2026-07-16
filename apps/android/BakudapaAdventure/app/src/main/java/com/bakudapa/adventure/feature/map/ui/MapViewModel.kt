@@ -15,6 +15,17 @@ class MapViewModel @Inject constructor(
 
     init {
         loadMarkers()
+        loadDownloadedRegions()
+    }
+
+    private fun loadDownloadedRegions() {
+        viewModelScope.launch {
+            (mapRepository as? com.bakudapa.adventure.feature.map.data.repository.MapRepositoryImpl)
+                ?.getDownloadedRegions()
+                ?.collect { regions ->
+                    setState { it.copy(downloadedRegions = regions.toList()) }
+                }
+        }
     }
 
     override fun onEvent(event: MapEvent) {
@@ -68,21 +79,10 @@ class MapViewModel @Inject constructor(
     private fun downloadMapRegion(regionName: String) {
         viewModelScope.launch {
             setState { it.copy(isDownloading = true, downloadProgress = 0) }
-            // Simulate progress while download happens
-            for (p in 0..100 step 10) {
-                setState { it.copy(downloadProgress = p) }
-                kotlinx.coroutines.delay(150)
-            }
             val result = mapRepository.downloadMapRegion(regionName)
             when (result) {
                 is DataResult.Success -> {
-                    setState {
-                        it.copy(
-                            isDownloading = false,
-                            downloadProgress = 100,
-                            downloadedRegions = it.downloadedRegions + regionName
-                        )
-                    }
+                    setState { it.copy(isDownloading = false, downloadProgress = 100) }
                     sendEffect(MapEffect.ShowToast("Map region '$regionName' downloaded"))
                 }
                 is DataResult.Error -> {
