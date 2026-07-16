@@ -17,6 +17,33 @@ class MountainRepositoryImpl @Inject constructor(
     private val firestoreManager: FirestoreManager
 ) : MountainRepository {
 
+    override fun getMountains(): Flow<DataResult<List<Mountain>>> = callbackFlow {
+        trySend(DataResult.Loading)
+        try {
+            val snap = firestoreManager.getCollection("mountains")
+                .orderBy("name", Query.Direction.ASCENDING)
+                .get()
+                .await()
+
+            val mountains = snap.documents.mapNotNull { doc ->
+                Mountain(
+                    id = doc.id,
+                    name = doc.getString("name") ?: return@mapNotNull null,
+                    location = doc.getString("location") ?: "",
+                    elevation = doc.getLong("elevation")?.toInt() ?: 0,
+                    imageUrl = doc.getString("imageUrl") ?: "",
+                    rating = doc.getDouble("rating")?.toFloat() ?: 0f,
+                    difficulty = MountainDifficulty.valueOf(doc.getString("difficulty") ?: "MODERATE"),
+                    distance = doc.getDouble("distance"),
+                )
+            }
+            trySend(DataResult.Success(mountains))
+        } catch (e: Exception) {
+            trySend(DataResult.Error(e))
+        }
+        awaitClose()
+    }
+
     override fun getMountainDetail(mountainId: String): Flow<DataResult<MountainDetail>> = callbackFlow {
         trySend(DataResult.Loading)
         try {
@@ -29,7 +56,7 @@ class MountainRepositoryImpl @Inject constructor(
                 imageUrl = doc.getString("imageUrl") ?: "",
                 rating = doc.getDouble("rating")?.toFloat() ?: 0f,
                 description = doc.getString("description") ?: "",
-                difficulty = doc.getString("difficulty") ?: "MODERATE",
+                difficulty = MountainDifficulty.valueOf(doc.getString("difficulty") ?: "MODERATE"),
                 bestSeason = doc.getString("bestSeason") ?: "",
                 latitude = doc.getDouble("latitude") ?: 0.0,
                 longitude = doc.getDouble("longitude") ?: 0.0,
@@ -57,7 +84,7 @@ class MountainRepositoryImpl @Inject constructor(
                     id = doc.id,
                     name = doc.getString("name") ?: return@mapNotNull null,
                     mountainName = doc.getString("mountainName") ?: "",
-                    difficulty = doc.getString("difficulty") ?: "MODERATE",
+                    difficulty = MountainDifficulty.valueOf(doc.getString("difficulty") ?: "MODERATE"),
                     durationMinutes = doc.getLong("durationMinutes")?.toInt() ?: 0,
                     distanceKm = doc.getDouble("distanceKm") ?: 0.0,
                     imageUrl = doc.getString("imageUrl") ?: "",

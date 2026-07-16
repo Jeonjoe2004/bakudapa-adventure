@@ -11,16 +11,22 @@ data class MapState(
     val userLocation: Pair<Double, Double>? = null,
     val zoomLevel: Double = 10.0,
     val isCompassEnabled: Boolean = true,
+    val compassAzimuth: Float = 0f,
     val isOfflineMode: Boolean = false,
-    val downloadedRegions: List<String> = emptyList()
+    val downloadedRegions: List<String> = emptyList(),
+    val isDownloading: Boolean = false,
+    val downloadProgress: Int = 0
 ) : UiState
 
 sealed class MapEvent : UiEvent {
     object LoadMarkers : MapEvent()
     data class OnMarkerClicked(val markerId: String) : MapEvent()
     data class OnLocationChanged(val lat: Double, val lng: Double) : MapEvent()
+    data class OnCompassChanged(val azimuth: Float) : MapEvent()
     object OnDownloadMapClicked : MapEvent()
+    data class OnDownloadRegion(val regionName: String) : MapEvent()
     object OnToggleOfflineMode : MapEvent()
+    object OnToggleCompass : MapEvent()
 }
 
 sealed class MapEffect : UiEffect {

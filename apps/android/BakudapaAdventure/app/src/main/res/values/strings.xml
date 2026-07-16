@@ -11,4 +11,23 @@
     <string name="permission_notification_rationale">Enable notifications to receive real-time chat messages and safety alerts from other adventurers.</string>
     <string name="grant_button">Grant</string>
     <string name="cancel_button">Cancel</string>
+    <string name="mountains_title">Mountains</string>
+    <string name="search_mountains_hint">Search mountains...</string>
+    <string name="no_mountains_found">No mountains match your search</string>
+    <string name="filter_title">Filter</string>
+    <string name="difficulty_label">Difficulty</string>
+    <string name="elevation_range_label">Elevation Range (m)</string>
+    <string name="min_elevation_hint">Min</string>
+    <string name="max_elevation_hint">Max</string>
+    <string name="apply_filters">Apply</string>
+    <string name="clear_filters">Clear</string>
+    <string name="easy">Easy</string>
+    <string name="moderate">Moderate</string>
+    <string name="hard">Hard</string>
+    <string name="expert">Expert</string>
+    <string name="all_difficulties">All</string>
+    <string name="loading_mountains">Loading mountains...</string>
+    <string name="view_all">View All</string>
+    <string name="error">Error</string>
+    <string name="retry">Retry</string>
 </resources>

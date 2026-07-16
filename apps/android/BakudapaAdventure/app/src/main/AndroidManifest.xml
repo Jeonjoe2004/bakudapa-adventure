@@ -39,10 +39,10 @@
             android:exported="false"
             android:foregroundServiceType="location" />
 
-        <!-- MapLibre — get your own token from https://maptiler.com/cloud/ -->
+        <!-- MapLibre — key dari MapTiler Cloud -->
         <meta-data
             android:name="com.maplibre.API_KEY"
-            android:value="YOUR_MAPTILER_KEY" />
+            android:value="U5vVZAqDgrDLsleNLnAc" />
 
     </application>
 

@@ -109,7 +109,7 @@ fun MountainDetailScreen(
                         ) {
                             StatChip(icon = Icons.Default.Height, value = "${mountain.elevation}m", label = "Elevation")
                             StatChip(icon = Icons.Default.Star, value = mountain.rating.toString(), label = "Rating")
-                            StatChip(icon = Icons.Default.Terrain, value = mountain.difficulty, label = "Difficulty")
+                            StatChip(icon = Icons.Default.Terrain, value = mountain.difficulty.name, label = "Difficulty")
                         }
                     }
 
@@ -276,7 +276,7 @@ private fun TrailCard(
                     color = MaterialTheme.colorScheme.outline
                 )
                 Spacer(Modifier.height(4.dp))
-                TrailDifficultyChip(trail.difficulty)
+                TrailDifficultyChip(trail.difficulty.name)
             }
             Icon(
                 Icons.Default.ChevronRight,

@@ -48,6 +48,31 @@ fun SectionHeader(
     }
 }
 
+@Composable
+fun SectionHeaderWithAction(
+    title: String,
+    actionText: String,
+    onActionClick: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    Row(
+        modifier = modifier
+            .fillMaxWidth()
+            .padding(horizontal = 16.dp, vertical = 8.dp),
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Text(
+            text = title,
+            style = MaterialTheme.typography.titleLarge,
+            fontWeight = FontWeight.Bold
+        )
+        TextButton(onClick = onActionClick) {
+            Text(text = actionText)
+        }
+    }
+}
+
 
 @Composable
 fun MountainCard(

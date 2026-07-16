@@ -1,5 +1,5 @@
 import { NavLink } from 'react-router-dom'
-import { LayoutDashboard, Mountain, Map, Users, LogOut, Menu, X } from 'lucide-react'
+import { LayoutDashboard, Mountain, Map, Users, MessageSquare, LogOut, Menu, X, MapPin, Clock, Star, FileText } from 'lucide-react'
 import { useState } from 'react'
 import { useAuth } from '../lib/useAuth'
 
@@ -7,6 +7,11 @@ const links = [
   { to: '/', label: 'Dashboard', icon: LayoutDashboard },
   { to: '/mountains', label: 'Mountains', icon: Mountain },
   { to: '/trails', label: 'Trails', icon: Map },
+  { to: '/poi', label: 'POI', icon: MapPin },
+  { to: '/pending-trails', label: 'Pending Trails', icon: Clock },
+  { to: '/reviews', label: 'Reviews', icon: Star },
+  { to: '/articles', label: 'Articles', icon: FileText },
+  { to: '/posts', label: 'Posts', icon: MessageSquare },
   { to: '/users', label: 'Users', icon: Users },
 ]
 

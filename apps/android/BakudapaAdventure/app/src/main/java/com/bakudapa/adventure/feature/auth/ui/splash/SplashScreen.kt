@@ -1,6 +1,6 @@
 package com.bakudapa.adventure.feature.auth.ui.splash
 
-import androidx.compose.foundation.Image
+import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.MaterialTheme
@@ -9,14 +9,35 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.geometry.Path
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.graphics.drawscope.Fill
+import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.hilt.navigation.compose.hiltViewModel
-import com.bakudapa.adventure.R
 import kotlinx.coroutines.flow.collectLatest
+
+@Composable
+fun SplashLogo() {
+    val amber = Color(0xFFFFA000)
+    Canvas(modifier = Modifier.size(120.dp), onDraw = {
+        val p = Path().apply {
+            moveTo(size.width * 0.1f, size.height * 0.9f)
+            lineTo(size.width * 0.5f, size.height * 0.15f)
+            lineTo(size.width * 0.9f, size.height * 0.9f)
+            close()
+        }
+        drawPath(p, Color.White.copy(alpha = 0.85f), style = Fill)
+        drawPath(p, Color.White, style = Stroke(width = 4f))
+
+        drawCircle(
+            color = amber.copy(alpha = 0.8f),
+            radius = size.minDimension * 0.1f,
+            center = center.copy(y = size.height * 0.12f)
+        )
+    })
+}
 
 @Composable
 fun SplashScreen(
@@ -42,15 +63,7 @@ fun SplashScreen(
         contentAlignment = Alignment.Center
     ) {
         Column(horizontalAlignment = Alignment.CenterHorizontally) {
-            // Placeholder for app logo
-            Box(
-                modifier = Modifier
-                    .size(120.dp)
-                    .background(Color.White, shape = MaterialTheme.shapes.medium),
-                contentAlignment = Alignment.Center
-            ) {
-                Text(text = "BA", color = MaterialTheme.colorScheme.primary, fontSize = 48.sp, fontWeight = FontWeight.Bold)
-            }
+            SplashLogo()
             
             Spacer(modifier = Modifier.height(24.dp))
             

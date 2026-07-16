@@ -32,18 +32,23 @@ import java.util.*
 fun ProfileScreen(
     onNavigateToEditProfile: () -> Unit,
     onNavigateToAuth: () -> Unit,
+    onNavigateToFollowers: () -> Unit = {},
+    onNavigateToFollowing: () -> Unit = {},
     viewModel: ProfileViewModel = hiltViewModel()
 ) {
     val state by viewModel.uiState.collectAsState()
     var showSignOutDialog by remember { mutableStateOf(false) }
+    val snackbarHostState = remember { SnackbarHostState() }
 
     LaunchedEffect(Unit) {
         viewModel.effect.collectLatest { effect ->
             when (effect) {
                 ProfileEffect.NavigateToEditProfile -> onNavigateToEditProfile()
                 ProfileEffect.NavigateToAuth -> onNavigateToAuth()
-                is ProfileEffect.ShowToast -> { /* Snackbar */ }
-                is ProfileEffect.ShowError -> { /* handled via UI */ }
+                is ProfileEffect.ShowToast -> snackbarHostState.showSnackbar(effect.message)
+                is ProfileEffect.ShowError -> snackbarHostState.showSnackbar(effect.message)
+                ProfileEffect.NavigateToFollowers -> onNavigateToFollowers()
+                ProfileEffect.NavigateToFollowing -> onNavigateToFollowing()
             }
         }
     }
@@ -71,6 +76,7 @@ fun ProfileScreen(
     }
 
     Scaffold(
+        snackbarHost = { SnackbarHost(snackbarHostState) },
         topBar = {
             TopAppBar(
                 title = { Text("Profil") },

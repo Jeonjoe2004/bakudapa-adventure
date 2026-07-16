@@ -1,32 +1,40 @@
 import { useEffect, useState } from 'react'
-import { collection, getDocs } from 'firebase/firestore'
+import { collection, getDocs, query, orderBy, limit } from 'firebase/firestore'
 import { db } from '../firebase'
-import { Mountain, Users, Map, TrendingUp } from 'lucide-react'
+import { Mountain, Users, Map, TrendingUp, FileText } from 'lucide-react'
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts'
 
 interface Stats { totalMountains: number; totalUsers: number; totalTrails: number; activeToday: number }
 interface ChartData { name: string; elevation: number; trails: number }
+interface RecentPost { id: string; content: string; authorName?: string; createdAt: number }
 
 export default function DashboardPage() {
   const [stats, setStats] = useState<Stats | null>(null)
   const [chartData, setChartData] = useState<ChartData[]>([])
+  const [recentPosts, setRecentPosts] = useState<RecentPost[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
 
   useEffect(() => {
     ;(async () => {
       try {
-        const [mSnap, uSnap, tSnap] = await Promise.all([
+        const [mSnap, uSnap, tSnap, pSnap] = await Promise.all([
           getDocs(collection(db, 'mountains')),
           getDocs(collection(db, 'users')),
           getDocs(collection(db, 'trails')),
+          getDocs(query(collection(db, 'posts'), orderBy('createdAt', 'desc'), limit(5))),
         ])
         setStats({
           totalMountains: mSnap.size,
           totalUsers: uSnap.size,
           totalTrails: tSnap.size,
-          activeToday: 0,
+          activeToday: uSnap.docs.filter(d => {
+            const last = d.data().lastActiveAt
+            return last && Date.now() - last < 86_400_000
+          }).length,
         })
+
+        setRecentPosts(pSnap.docs.map(d => ({ id: d.id, ...d.data() } as RecentPost)))
 
         const mountains = mSnap.docs.map(d => ({ id: d.id, ...d.data() }))
         const trails = tSnap.docs.map(d => ({ ...d.data() }))
@@ -98,8 +106,24 @@ export default function DashboardPage() {
       )}
 
       <div className="bg-white rounded-xl shadow-sm p-6">
-        <h2 className="font-semibold text-gray-700 mb-2">Recent Activity</h2>
-        <p className="text-gray-400 text-sm">Coming soon — real-time activity feed.</p>
+        <h2 className="font-semibold text-gray-700 mb-2">Recent Posts</h2>
+        {recentPosts.length === 0 ? (
+          <p className="text-gray-400 text-sm">No posts yet.</p>
+        ) : (
+          <div className="space-y-3">
+            {recentPosts.map(p => (
+              <div key={p.id} className="flex items-start gap-3 border-b border-gray-100 pb-3 last:border-0">
+                <FileText size={16} className="text-gray-400 mt-0.5 shrink-0" />
+                <div className="min-w-0">
+                  <p className="text-sm text-gray-700 truncate">{p.content}</p>
+                  <p className="text-xs text-gray-400 mt-0.5">
+                    {p.authorName || 'Anonymous'} &middot; {new Date(p.createdAt).toLocaleDateString()}
+                  </p>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
       </div>
     </div>
   )

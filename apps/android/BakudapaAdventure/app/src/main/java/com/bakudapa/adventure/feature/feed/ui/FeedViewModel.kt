@@ -1,16 +1,20 @@
 package com.bakudapa.adventure.feature.feed.ui
 
+import android.content.Context
+import android.content.Intent
 import androidx.lifecycle.viewModelScope
 import com.bakudapa.adventure.core.base.BaseViewModel
 import com.bakudapa.adventure.core.data.DataResult
 import com.bakudapa.adventure.feature.feed.domain.repository.FeedRepository
+import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
 class FeedViewModel @Inject constructor(
-    private val repository: FeedRepository
+    private val repository: FeedRepository,
+    @ApplicationContext private val context: Context
 ) : BaseViewModel<FeedState, FeedEvent, FeedEffect>(FeedState()) {
 
     init {
@@ -23,7 +27,7 @@ class FeedViewModel @Inject constructor(
             is FeedEvent.OnLikeClicked -> handleLike(event.postId, event.isLiked)
             is FeedEvent.OnSaveClicked -> handleSave(event.postId, event.isSaved)
             is FeedEvent.OnCommentClicked -> sendEffect(FeedEffect.NavigateToComments(event.postId))
-            is FeedEvent.OnShareClicked -> { /* TODO: Implement share intent */ }
+            is FeedEvent.OnShareClicked -> handleShare(event.post)
             is FeedEvent.OnReportClicked -> handleReport(event.postId)
             is FeedEvent.OnNewPostContentChanged -> setState { it.copy(newPostContent = event.content) }
             is FeedEvent.OnNewPostMediaSelected -> setState { it.copy(newPostMediaUri = event.uri) }
@@ -60,6 +64,20 @@ class FeedViewModel @Inject constructor(
             repository.reportPost(postId, "Inappropriate content")
             sendEffect(FeedEffect.ShowError("Post reported. Thank you."))
         }
+    }
+
+    private fun handleShare(post: com.bakudapa.adventure.feature.feed.domain.model.Post) {
+        val shareText = buildString {
+            appendLine(post.content.ifBlank { "Bakudapa Adventure" })
+            if (post.mediaUrl != null) appendLine("📸 ${post.mediaUrl}")
+            appendLine("\n— ${post.authorName}")
+            appendLine("\nBagikan petualanganmu di Bakudapa Adventure!")
+        }
+        val intent = Intent(Intent.ACTION_SEND).apply {
+            type = "text/plain"
+            putExtra(Intent.EXTRA_TEXT, shareText)
+        }
+        context.startActivity(Intent.createChooser(intent, "Bagikan via"))
     }
 
     private fun createPost() {

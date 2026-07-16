@@ -22,11 +22,13 @@ import com.bakudapa.adventure.core.ui.components.HandlePermissions
 import com.bakudapa.adventure.core.utils.PermissionUtils
 import com.bakudapa.adventure.feature.tracking.domain.model.TrackingStatus
 import kotlinx.coroutines.flow.collectLatest
+import com.bakudapa.adventure.navigation.Screen
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun TrackingScreen(
     onNavigateBack: () -> Unit,
+    onNavigateToCreatePost: (String) -> Unit = {},
     viewModel: TrackingViewModel = hiltViewModel()
 ) {
     val state by viewModel.uiState.collectAsState()
@@ -40,6 +42,7 @@ fun TrackingScreen(
                 state = state,
                 snackbarHostState = snackbarHostState,
                 onNavigateBack = onNavigateBack,
+                onNavigateToCreatePost = onNavigateToCreatePost,
                 viewModel = viewModel
             )
         }
@@ -52,6 +55,7 @@ private fun TrackingContent(
     state: TrackingState,
     snackbarHostState: SnackbarHostState,
     onNavigateBack: () -> Unit,
+    onNavigateToCreatePost: (String) -> Unit,
     viewModel: TrackingViewModel
 ) {
     var showSaveDialog by remember { mutableStateOf(false) }
@@ -111,8 +115,18 @@ private fun TrackingContent(
                 }
             },
             dismissButton = {
-                TextButton(onClick = { showSaveDialog = false }) {
-                    Text("Buang")
+                Row {
+                    if (routeName.isNotBlank()) {
+                        TextButton(onClick = {
+                            onNavigateToCreatePost("✅ Pendakian selesai: $routeName - ${"%.2f".format(state.currentRoute.distanceMeters / 1000)}km, ${state.currentRoute.calories}kkal")
+                            showSaveDialog = false
+                        }) {
+                            Text("Simpan & Bagikan", color = MaterialTheme.colorScheme.primary)
+                        }
+                    }
+                    TextButton(onClick = { showSaveDialog = false }) {
+                        Text("Buang")
+                    }
                 }
             }
         )

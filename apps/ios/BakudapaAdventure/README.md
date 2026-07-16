@@ -48,11 +48,11 @@ BakudapaAdventure/
     ├── Mountain/                    ← Detail gunung + trail list
     ├── Trail/                       ← Detail trail + gear + start
     ├── Map/                         ← MapKit
-    ├── Feed/                        ← (Coming Soon)
-    ├── Chat/                        ← (Coming Soon)
+    ├── Feed/                        ← Feed komunitas + post list
+    ├── Chat/                        ← Chat rooms + messaging
     ├── Profile/                     ← Profile + sign out
     ├── Emergency/                   ← SOS
-    ├── Badge/                       ← (Coming Soon)
+    ├── Badge/                       ← Achievement badges grid
     └── Settings/                    ← Dark mode + preferences
 ```
 
@@ -69,3 +69,6 @@ Pastikan Firestore punya koleksi: `mountains`, `trails`, `users`, `posts`
 - Detail trail (stats, difficulty, gear, tracking)
 - Dark mode di Settings
 - Emergency SOS screen
+- Feed list with real Firestore data
+- Chat room list with unread badges
+- Badges/achievements gallery

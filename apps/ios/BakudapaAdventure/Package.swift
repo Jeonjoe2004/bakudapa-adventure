@@ -20,6 +20,10 @@ let package = Package(
             resources: [
                 .process("GoogleService-Info.plist")
             ]
-        )
+        ),
+        .testTarget(
+            name: "BakudapaAdventureTests",
+            dependencies: ["BakudapaAdventure"]
+        ),
     ]
 )

@@ -6,6 +6,7 @@ import com.bakudapa.adventure.data.remote.firebase.FirestoreManager
 import com.bakudapa.adventure.feature.auth.domain.model.AuthUser
 import com.bakudapa.adventure.feature.auth.domain.repository.AuthRepository
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.auth.GoogleAuthProvider
 import com.google.firebase.auth.UserProfileChangeRequest
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
@@ -58,6 +59,25 @@ class AuthRepositoryImpl @Inject constructor(
                 AuthUser(
                     uid = user.uid,
                     email = user.email ?: "",
+                    isEmailVerified = user.isEmailVerified
+                )
+            )
+        } catch (e: Exception) {
+            DataResult.Error(e)
+        }
+    }
+
+    override suspend fun signInWithGoogle(idToken: String): DataResult<AuthUser> {
+        return try {
+            val credential = GoogleAuthProvider.getCredential(idToken, null)
+            val result = auth.signInWithCredential(credential).await()
+            val user = result.user!!
+            DataResult.Success(
+                AuthUser(
+                    uid = user.uid,
+                    email = user.email ?: "",
+                    displayName = user.displayName,
+                    photoUrl = user.photoUrl?.toString(),
                     isEmailVerified = user.isEmailVerified
                 )
             )

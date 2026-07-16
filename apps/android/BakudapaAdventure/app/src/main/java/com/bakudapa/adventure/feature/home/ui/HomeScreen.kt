@@ -23,6 +23,12 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.bakudapa.adventure.core.ui.components.ShimmerItem
 import com.bakudapa.adventure.feature.home.ui.components.*
+import com.bakudapa.adventure.R
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.Text
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.unit.sp
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -30,22 +36,29 @@ fun HomeScreen(
     onNavigateToMap: () -> Unit,
     onNavigateToMountainDetail: (String) -> Unit,
     onNavigateToTrailDetail: (String) -> Unit,
+    onNavigateToPostDetail: (String) -> Unit,
+    onNavigateToMountainList: () -> Unit,
+    onNavigateToFeed: () -> Unit = {},
+    onNavigateToNotifications: () -> Unit = {},
     viewModel: HomeViewModel = hiltViewModel()
 ) {
     val state by viewModel.uiState.collectAsState()
+    val snackbarHostState = remember { SnackbarHostState() }
 
     LaunchedEffect(Unit) {
         viewModel.effect.collect { effect ->
             when (effect) {
                 is HomeEffect.NavigateToMountainDetail -> onNavigateToMountainDetail(effect.id)
                 is HomeEffect.NavigateToTrailDetail -> onNavigateToTrailDetail(effect.id)
-                is HomeEffect.NavigateToPostDetail -> { /* TODO */ }
-                is HomeEffect.ShowError -> { /* TODO: Snackbar */ }
+                is HomeEffect.NavigateToPostDetail -> onNavigateToPostDetail(effect.id)
+                is HomeEffect.NavigateToMountainList -> onNavigateToMountainList()
+                is HomeEffect.ShowError -> snackbarHostState.showSnackbar(effect.message)
             }
         }
     }
 
     Scaffold(
+        snackbarHost = { SnackbarHost(snackbarHostState) },
         topBar = {
             CenterAlignedTopAppBar(
                 title = {
@@ -56,7 +69,7 @@ fun HomeScreen(
                     )
                 },
                 actions = {
-                    IconButton(onClick = { /* TODO */ }) {
+                    IconButton(onClick = onNavigateToNotifications) {
                         Icon(Icons.Default.Notifications, contentDescription = "Notifications")
                     }
                 }
@@ -114,16 +127,20 @@ fun HomeScreen(
                             .padding(horizontal = 8.dp),
                         horizontalArrangement = Arrangement.SpaceEvenly
                     ) {
-                        QuickActionButton(icon = Icons.Default.Terrain, label = "Mountains", onClick = { })
+                        QuickActionButton(icon = Icons.Default.Terrain, label = "Mountains", onClick = onNavigateToMountainList)
                         QuickActionButton(icon = Icons.Default.Map, label = "Maps", onClick = onNavigateToMap)
-                        QuickActionButton(icon = Icons.Default.Explore, label = "Trails", onClick = { })
-                        QuickActionButton(icon = Icons.Default.Group, label = "Community", onClick = { })
+                        QuickActionButton(icon = Icons.Default.Explore, label = "Trails", onClick = onNavigateToMountainList)
+                        QuickActionButton(icon = Icons.Default.Group, label = "Community", onClick = onNavigateToFeed)
                     }
                 }
 
                 // 4. Recommended Mountains
                 item {
-                    SectionHeader(title = "Recommended")
+                    SectionHeaderWithAction(
+                        title = "Recommended",
+                        actionText = stringResource(R.string.view_all),
+                        onActionClick = onNavigateToMountainList
+                    )
                     LazyRow(
                         contentPadding = PaddingValues(horizontal = 8.dp)
                     ) {
@@ -138,7 +155,11 @@ fun HomeScreen(
 
                 // 5. Nearby Mountains
                 item {
-                    SectionHeader(title = "Nearby You")
+                    SectionHeaderWithAction(
+                        title = "Nearby You",
+                        actionText = stringResource(R.string.view_all),
+                        onActionClick = onNavigateToMountainList
+                    )
                     LazyRow(
                         contentPadding = PaddingValues(horizontal = 8.dp)
                     ) {

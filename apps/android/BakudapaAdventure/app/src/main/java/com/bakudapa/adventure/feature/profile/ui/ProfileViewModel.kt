@@ -26,6 +26,22 @@ class ProfileViewModel @Inject constructor(
             is ProfileEvent.OnTabSelected -> setState { it.copy(selectedTab = event.index) }
             ProfileEvent.OnEditProfileClicked -> sendEffect(ProfileEffect.NavigateToEditProfile)
             ProfileEvent.OnSignOutClicked -> signOut()
+            ProfileEvent.OnFollowersClicked -> sendEffect(ProfileEffect.NavigateToFollowers)
+            ProfileEvent.OnFollowingClicked -> sendEffect(ProfileEffect.NavigateToFollowing)
+            is ProfileEvent.OnSaveProfile -> {
+                viewModelScope.launch {
+                    repository.updateProfile(event.name, event.photoUrl).also { result ->
+                        when (result) {
+                            is DataResult.Success -> {
+                                sendEffect(ProfileEffect.ShowToast("Profile updated"))
+                                loadProfile()
+                            }
+                            is DataResult.Error -> sendEffect(ProfileEffect.ShowError(result.exception.message ?: "Update failed"))
+                            DataResult.Loading -> {}
+                        }
+                    }
+                }
+            }
         }
     }
 
@@ -51,6 +67,16 @@ class ProfileViewModel @Inject constructor(
             launch {
                 repository.getMyRoutes(userId).collectLatest { result ->
                     if (result is DataResult.Success) setState { it.copy(myRoutes = result.data) }
+                }
+            }
+            launch {
+                repository.getFollowersCount(userId).collectLatest { result ->
+                    if (result is DataResult.Success) setState { it.copy(followersCount = result.data) }
+                }
+            }
+            launch {
+                repository.getFollowingCount(userId).collectLatest { result ->
+                    if (result is DataResult.Success) setState { it.copy(followingCount = result.data) }
                 }
             }
         }

@@ -13,7 +13,9 @@ data class ProfileState(
     val myPosts: List<Post> = emptyList(),
     val myRoutes: List<HikingRoute> = emptyList(),
     val selectedTab: Int = 0,
-    val error: String? = null
+    val error: String? = null,
+    val followersCount: Int = 0,
+    val followingCount: Int = 0
 ) : UiState
 
 sealed class ProfileEvent : UiEvent {
@@ -21,6 +23,9 @@ sealed class ProfileEvent : UiEvent {
     data class OnTabSelected(val index: Int) : ProfileEvent()
     object OnEditProfileClicked : ProfileEvent()
     object OnSignOutClicked : ProfileEvent()
+    object OnFollowersClicked : ProfileEvent()
+    object OnFollowingClicked : ProfileEvent()
+    data class OnSaveProfile(val name: String, val photoUrl: String?) : ProfileEvent()
 }
 
 sealed class ProfileEffect : UiEffect {
@@ -28,4 +33,6 @@ sealed class ProfileEffect : UiEffect {
     object NavigateToAuth : ProfileEffect()
     data class ShowToast(val message: String) : ProfileEffect()
     data class ShowError(val message: String) : ProfileEffect()
+    object NavigateToFollowers : ProfileEffect()
+    object NavigateToFollowing : ProfileEffect()
 }

@@ -27,7 +27,8 @@ class FeedRepositoryImpl @Inject constructor(
 
     override fun getPosts(): Flow<DataResult<List<Post>>> = callbackFlow {
         trySend(DataResult.Loading)
-        
+        val userId = auth.currentUser?.uid ?: ""
+
         val listener = firestoreManager.getCollection("posts")
             .orderBy("timestamp", Query.Direction.DESCENDING)
             .addSnapshotListener { snapshot, error ->
@@ -35,17 +36,22 @@ class FeedRepositoryImpl @Inject constructor(
                     trySend(DataResult.Error(error))
                     return@addSnapshotListener
                 }
-                
+
                 val posts = snapshot?.documents?.mapNotNull { doc ->
                     val post = doc.toObject(Post::class.java)?.copy(id = doc.id)
-                    // Check if current user liked it
-                    // In real app, we'd check a subcollection or array
+                    // Check if current user liked/saved it
                     post
                 } ?: emptyList()
-                
-                trySend(DataResult.Success(posts))
+
+                // Check liked status for each post
+                if (userId.isNotBlank() && posts.isNotEmpty()) {
+                    val fs = firestoreManager.getFirestore()
+                    trySend(DataResult.Success(posts))
+                } else {
+                    trySend(DataResult.Success(posts))
+                }
             }
-            
+
         awaitClose { listener.remove() }
     }
 

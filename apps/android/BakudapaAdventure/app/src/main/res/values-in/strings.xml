@@ -24,4 +24,22 @@
     <string name="retry">Coba Lagi</string>
     <string name="no_data">Tidak ada data</string>
     <string name="error_generic">Terjadi kesalahan</string>
+    <string name="error">Kesalahan</string>
+    <string name="mountains_title">Gunung</string>
+    <string name="search_mountains_hint">Cari gunung...</string>
+    <string name="no_mountains_found">Tidak ada gunung yang cocok</string>
+    <string name="filter_title">Filter</string>
+    <string name="difficulty_label">Tingkat Kesulitan</string>
+    <string name="elevation_range_label">Kisaran Elevasi (m)</string>
+    <string name="min_elevation_hint">Min</string>
+    <string name="max_elevation_hint">Maks</string>
+    <string name="apply_filters">Terapkan</string>
+    <string name="clear_filters">Hapus</string>
+    <string name="easy">Mudah</string>
+    <string name="moderate">Sedang</string>
+    <string name="hard">Sulit</string>
+    <string name="expert">Ahli</string>
+    <string name="all_difficulties">Semua</string>
+    <string name="loading_mountains">Memuat gunung...</string>
+    <string name="view_all">Lihat Semua</string>
 </resources>

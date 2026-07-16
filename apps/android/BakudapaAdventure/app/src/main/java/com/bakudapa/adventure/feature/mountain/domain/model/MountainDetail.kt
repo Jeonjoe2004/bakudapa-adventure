@@ -2,6 +2,8 @@ package com.bakudapa.adventure.feature.mountain.domain.model
 
 import com.bakudapa.adventure.feature.home.domain.model.Mountain
 
+enum class MountainDifficulty { EASY, MODERATE, HARD, EXPERT }
+
 data class MountainDetail(
     val id: String,
     val name: String,
@@ -10,21 +12,21 @@ data class MountainDetail(
     val imageUrl: String,
     val rating: Float,
     val description: String = "",
-    val difficulty: String = "",
+    val difficulty: MountainDifficulty = MountainDifficulty.MODERATE,
     val bestSeason: String = "",
     val latitude: Double = 0.0,
     val longitude: Double = 0.0,
     val distance: Double? = null,
     val weatherTip: String = "",
 ) {
-    fun toBasicMountain() = Mountain(id, name, location, elevation, imageUrl, rating, distance)
+    fun toBasicMountain() = Mountain(id, name, location, elevation, imageUrl, rating, difficulty, distance)
 }
 
 data class TrailInfo(
     val id: String,
     val name: String,
     val mountainName: String,
-    val difficulty: String,
+    val difficulty: MountainDifficulty = MountainDifficulty.MODERATE,
     val durationMinutes: Int,
     val distanceKm: Double,
     val imageUrl: String,

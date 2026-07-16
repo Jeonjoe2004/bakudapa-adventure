@@ -10,11 +10,11 @@ Platform digital pendakian gunung Indonesia — navigasi, komunitas, keselamatan
 | Daftar & Detail Gunung | ✅ | ✅ | ✅ CRUD |
 | Detail Jalur Pendakian | ✅ | ✅ | - |
 | Peta & GPS Tracking | ✅ | 🟡 | - |
-| Feed Komunitas | ✅ | 🟡 | - |
-| Chat | ✅ | 🟡 | - |
+| Feed Komunitas | ✅ | ✅ | - |
+| Chat | ✅ | ✅ | - |
 | Profil & Statistik | ✅ | ✅ | - |
 | Emergency SOS | ✅ | ✅ | - |
-| Badge & Achievement | ✅ | 🟡 | - |
+| Badge & Achievement | ✅ | ✅ | - |
 | Pengaturan | ✅ | ✅ | - |
 | Dashboard Admin | - | - | ✅ |
 | Manajemen Gunung (CRUD) | - | - | ✅ |

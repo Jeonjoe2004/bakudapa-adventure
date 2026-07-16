@@ -4,6 +4,7 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyListScope
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
@@ -19,6 +20,10 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import coil.compose.rememberAsyncImagePainter
 import com.bakudapa.adventure.core.ui.components.ShimmerItem
+import com.bakudapa.adventure.feature.mountain.domain.model.TrailInfo
+import com.bakudapa.adventure.feature.trail.domain.model.Checkpoint
+import com.bakudapa.adventure.feature.trail.domain.model.PointOfInterest
+import com.bakudapa.adventure.feature.trail.domain.model.PoiType
 import com.bakudapa.adventure.feature.trail.domain.model.TrailDetail
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -26,6 +31,7 @@ import com.bakudapa.adventure.feature.trail.domain.model.TrailDetail
 fun TrailDetailScreen(
     onNavigateBack: () -> Unit,
     onNavigateToTracking: (String) -> Unit,
+    onNavigateToTrail: (String) -> Unit = {},
     viewModel: TrailDetailViewModel = hiltViewModel()
 ) {
     val state by viewModel.uiState.collectAsState()
@@ -99,7 +105,7 @@ fun TrailDetailScreen(
                             modifier = Modifier.padding(horizontal = 16.dp),
                             verticalAlignment = Alignment.CenterVertically
                         ) {
-                            DifficultyBadge(trail.difficulty)
+                            DifficultyBadge(trail.difficulty.name)
                             Spacer(Modifier.width(8.dp))
                             Text(
                                 text = "Max elevation: ${trail.maxElevation}m",
@@ -135,32 +141,74 @@ fun TrailDetailScreen(
                         }
                     }
 
-                    // Water sources
-                    if (trail.waterSources.isNotEmpty()) {
-                        item { TrailSection(title = "Water Sources") {} }
-                        items(trail.waterSources.size) { i ->
+                    // Points of Interest
+                    val poiByType = trail.pointsOfInterest.groupBy { it.type }
+
+                    if (poiByType.isNotEmpty()) {
+                        PoiSection(
+                            title = "Camping Grounds",
+                            pois = poiByType[PoiType.CAMPING_GROUND] ?: emptyList(),
+                            icon = Icons.Default.Home,
+                        )
+                        PoiSection(
+                            title = "Water Sources",
+                            pois = poiByType[PoiType.WATER_SOURCE] ?: emptyList(),
+                            icon = Icons.Default.WaterDrop,
+                        )
+                        PoiSection(
+                            title = "Shelters",
+                            pois = poiByType[PoiType.SHELTER] ?: emptyList(),
+                            icon = Icons.Default.LocationOn,
+                        )
+                    }
+
+                    // Danger Zones
+                    val dangerZones = poiByType[PoiType.DANGER_ZONE] ?: emptyList()
+                    if (dangerZones.isNotEmpty()) {
+                        item {
+                            TrailSection(title = "⚠ Danger Zones") {}
+                        }
+                        items(dangerZones.size) { i ->
+                            val dz = dangerZones[i]
                             ListItem(
-                                headlineContent = { Text(trail.waterSources[i]) },
+                                headlineContent = { Text(dz.name) },
+                                supportingContent = {
+                                    if (dz.description.isNotEmpty()) Text(dz.description, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.error)
+                                },
                                 leadingContent = {
-                                    Icon(Icons.Default.WaterDrop, contentDescription = null,
-                                        tint = MaterialTheme.colorScheme.primary)
+                                    Icon(Icons.Default.Warning, contentDescription = null, tint = MaterialTheme.colorScheme.error)
                                 }
                             )
                         }
                     }
 
-                    // Camping spots
-                    if (trail.campingSpots.isNotEmpty()) {
-                        item { TrailSection(title = "Camping Spots") {} }
-                        items(trail.campingSpots.size) { i ->
-                            ListItem(
-                                headlineContent = { Text(trail.campingSpots[i]) },
-                                leadingContent = {
-                                    Icon(Icons.Default.Home, contentDescription = null,
-                                        tint = MaterialTheme.colorScheme.primary)
-                                }
-                            )
-                        }
+                    // Elevation Profile
+                    item {
+                        ElevationProfileSection(
+                            checkpoints = trail.checkpoints,
+                            modifier = Modifier.padding(vertical = 8.dp)
+                        )
+                    }
+
+                    // Reviews - LazyListScope extension, call directly
+                    TrailReviewSection(
+                        reviews = state.reviews,
+                        reviewInput = state.reviewInput,
+                        reviewRating = state.reviewRating,
+                        isSending = state.isSending,
+                        onInputChanged = { viewModel.onEvent(TrailDetailEvent.ReviewInputChanged(it)) },
+                        onRatingChanged = { viewModel.onEvent(TrailDetailEvent.ReviewRatingChanged(it)) },
+                        onSend = { viewModel.onEvent(TrailDetailEvent.ReviewSend) }
+                    )
+
+                    // Alternative Trails
+                    item {
+                        AlternativeTrailsSection(
+                            alternativeTrails = state.alternativeTrails.filter { it.id != trail.id },
+                            onTrailClick = { trailId ->
+                                onNavigateToTrail(trailId)
+                            }
+                        )
                     }
 
                     // Start button
@@ -248,8 +296,78 @@ private fun TrailError(message: String, onRetry: () -> Unit) {
     }
 }
 
+private fun LazyListScope.PoiSection(
+    title: String,
+    pois: List<PointOfInterest>,
+    icon: androidx.compose.ui.graphics.vector.ImageVector,
+) {
+    if (pois.isEmpty()) return
+    item {
+        TrailSection(title = title) {}
+    }
+    items(pois.size) { i ->
+        val poi = pois[i]
+        ListItem(
+            headlineContent = { Text(poi.name) },
+            supportingContent = {
+                if (poi.elevation > 0 || poi.description.isNotEmpty()) {
+                    Text(
+                        buildString {
+                            if (poi.elevation > 0) append("${poi.elevation}m")
+                            if (poi.elevation > 0 && poi.description.isNotEmpty()) append(" • ")
+                            if (poi.description.isNotEmpty()) append(poi.description)
+                        },
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.outline
+                    )
+                }
+            },
+            leadingContent = {
+                Icon(icon, contentDescription = null, tint = MaterialTheme.colorScheme.primary)
+            }
+        )
+    }
+}
+
 private fun convertMinutes(minutes: Int): String {
     val h = minutes / 60
     val m = minutes % 60
     return if (h > 0) "${h}h ${m}m" else "${m}m"
+}
+
+@Composable
+fun AlternativeTrailsSection(
+    alternativeTrails: List<TrailInfo>,
+    onTrailClick: (String) -> Unit
+) {
+    if (alternativeTrails.isEmpty()) return
+
+    Column(modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)) {
+        Text(
+            text = "Other Trails",
+            style = MaterialTheme.typography.titleMedium,
+            fontWeight = FontWeight.Bold
+        )
+        Spacer(Modifier.height(8.dp))
+        alternativeTrails.forEach { trail ->
+            Surface(
+                onClick = { onTrailClick(trail.id) },
+                shape = RoundedCornerShape(12.dp),
+                modifier = Modifier.fillMaxWidth().padding(vertical = 3.dp)
+            ) {
+                Row(
+                    modifier = Modifier.padding(12.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Column(modifier = Modifier.weight(1f)) {
+                        Text(trail.name, fontWeight = FontWeight.SemiBold)
+                        Text("${trail.distanceKm}km • ${trail.durationMinutes}min • ${trail.difficulty.name}",
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.outline)
+                    }
+                    Icon(Icons.Default.ChevronRight, null, tint = MaterialTheme.colorScheme.outline)
+                }
+            }
+        }
+    }
 }

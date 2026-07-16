@@ -22,11 +22,13 @@ sealed class HomeEvent : UiEvent {
     data class OnMountainClicked(val mountainId: String) : HomeEvent()
     data class OnTrailClicked(val trailId: String) : HomeEvent()
     data class OnPostClicked(val postId: String) : HomeEvent()
+    object OnViewAllMountainsClicked : HomeEvent()
 }
 
 sealed class HomeEffect : UiEffect {
     data class NavigateToMountainDetail(val id: String) : HomeEffect()
     data class NavigateToTrailDetail(val id: String) : HomeEffect()
     data class NavigateToPostDetail(val id: String) : HomeEffect()
+    object NavigateToMountainList : HomeEffect()
     data class ShowError(val message: String) : HomeEffect()
 }

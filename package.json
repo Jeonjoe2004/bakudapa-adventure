@@ -1,4 +1,20 @@
 {
+  "name": "bakudapa-adventure",
+  "version": "1.0.0",
+  "description": "Platform digital pendakian gunung Indonesia",
+  "private": true,
+  "scripts": {
+    "seed": "node scripts/seed-firestore.mjs",
+    "dev:admin": "cd apps/admin-web && npm run dev",
+    "build:admin": "cd apps/admin-web && npm run build",
+    "build:android": "cd apps/android/BakudapaAdventure && ./gradlew assembleDebug",
+    "deploy:functions": "firebase deploy --only functions",
+    "deploy:hosting": "firebase deploy --only hosting",
+    "deploy:firestore": "firebase deploy --only firestore",
+    "deploy:storage": "firebase deploy --only storage",
+    "deploy:all": "firebase deploy",
+    "emulators": "firebase emulators:start"
+  },
   "dependencies": {
     "firebase-admin": "^14.1.0"
   }

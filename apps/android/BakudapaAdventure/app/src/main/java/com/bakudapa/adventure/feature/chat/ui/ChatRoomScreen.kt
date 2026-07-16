@@ -1,5 +1,8 @@
 package com.bakudapa.adventure.feature.chat.ui
 
+import android.net.Uri
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -7,6 +10,7 @@ import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.AttachFile
 import androidx.compose.material.icons.filled.Send
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -30,6 +34,19 @@ fun ChatRoomScreen(
     val state by viewModel.uiState.collectAsState()
     val listState = rememberLazyListState()
     val currentUserId = auth.currentUser?.uid
+    val snackbarHostState = remember { SnackbarHostState() }
+
+    val imagePickerLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.GetContent()
+    ) { uri: Uri? ->
+        if (uri != null) viewModel.sendMedia(uri, isImage = true)
+    }
+
+    val filePickerLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.GetContent()
+    ) { uri: Uri? ->
+        if (uri != null) viewModel.sendMedia(uri, isImage = false)
+    }
 
     LaunchedEffect(roomId) {
         viewModel.onEvent(ChatRoomEvent.LoadMessages(roomId))
@@ -50,14 +67,15 @@ fun ChatRoomScreen(
                         listState.animateScrollToItem(state.messages.size - 1)
                     }
                 }
-                is ChatRoomEffect.ShowError -> { /* handled via snackbar jika dibutuhkan */ }
+                is ChatRoomEffect.ShowError -> snackbarHostState.showSnackbar(effect.message)
+                is ChatRoomEffect.PickMedia -> imagePickerLauncher.launch("image/*")
             }
         }
     }
 
     Scaffold(
-        topBar = {
-            TopAppBar(
+        snackbarHost = { SnackbarHost(snackbarHostState) },
+        topBar = { TopAppBar(
                 title = {
                     Column {
                         Text(
@@ -90,11 +108,14 @@ fun ChatRoomScreen(
         bottomBar = {
             MessageInputBar(
                 value = state.currentMessage,
+                isUploading = state.isUploadingMedia,
                 onValueChange = { text ->
                     viewModel.onEvent(ChatRoomEvent.OnMessageChanged(text))
                     viewModel.onEvent(ChatRoomEvent.OnTyping(text.isNotEmpty()))
                 },
-                onSend = { viewModel.onEvent(ChatRoomEvent.OnSendClicked) }
+                onSend = { viewModel.onEvent(ChatRoomEvent.OnSendClicked) },
+                onAttachImage = { imagePickerLauncher.launch("image/*") },
+                onAttachFile = { filePickerLauncher.launch("*/*") }
             )
         }
     ) { padding ->
@@ -130,8 +151,11 @@ fun ChatRoomScreen(
 @Composable
 private fun MessageInputBar(
     value: String,
+    isUploading: Boolean = false,
     onValueChange: (String) -> Unit,
-    onSend: () -> Unit
+    onSend: () -> Unit,
+    onAttachImage: () -> Unit = {},
+    onAttachFile: () -> Unit = {}
 ) {
     Surface(tonalElevation = 4.dp) {
         Row(
@@ -140,8 +164,13 @@ private fun MessageInputBar(
                 .padding(horizontal = 12.dp, vertical = 8.dp)
                 .navigationBarsPadding()
                 .imePadding(),
-            verticalAlignment = Alignment.Bottom
+            verticalAlignment = Alignment.CenterVertically
         ) {
+            // Attach image
+            IconButton(onClick = onAttachImage, enabled = !isUploading) {
+                Icon(Icons.Default.AttachFile, contentDescription = "Lampirkan gambar")
+            }
+
             OutlinedTextField(
                 value = value,
                 onValueChange = onValueChange,
@@ -149,23 +178,24 @@ private fun MessageInputBar(
                 placeholder = { Text("Tulis pesan...") },
                 shape = RoundedCornerShape(24.dp),
                 maxLines = 5,
+                enabled = !isUploading,
                 colors = OutlinedTextFieldDefaults.colors(
                     focusedBorderColor = MaterialTheme.colorScheme.primary,
                     unfocusedBorderColor = MaterialTheme.colorScheme.outline.copy(alpha = 0.4f)
                 )
             )
             Spacer(modifier = Modifier.width(8.dp))
-            // Tombol kirim — hanya aktif kalau ada teks
-            val canSend = value.isNotBlank()
-            FilledIconButton(
-                onClick = onSend,
-                enabled = canSend,
-                modifier = Modifier.size(48.dp)
-            ) {
-                Icon(
-                    imageVector = Icons.Default.Send,
-                    contentDescription = "Kirim"
-                )
+            if (isUploading) {
+                CircularProgressIndicator(modifier = Modifier.size(24.dp), strokeWidth = 2.dp)
+            } else {
+                val canSend = value.isNotBlank()
+                FilledIconButton(
+                    onClick = onSend,
+                    enabled = canSend,
+                    modifier = Modifier.size(48.dp)
+                ) {
+                    Icon(imageVector = Icons.Default.Send, contentDescription = "Kirim")
+                }
             }
         }
     }

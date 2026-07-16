@@ -1,5 +1,6 @@
 package com.bakudapa.adventure.feature.chat.ui
 
+import android.net.Uri
 import com.bakudapa.adventure.core.base.UiEffect
 import com.bakudapa.adventure.core.base.UiEvent
 import com.bakudapa.adventure.core.base.UiState
@@ -32,7 +33,8 @@ data class ChatRoomState(
     val currentMessage: String = "",
     val error: String? = null,
     val isOtherUserTyping: Boolean = false,
-    val otherUserOnline: Boolean = false
+    val otherUserOnline: Boolean = false,
+    val isUploadingMedia: Boolean = false
 ) : UiState
 
 sealed class ChatRoomEvent : UiEvent {
@@ -42,9 +44,11 @@ sealed class ChatRoomEvent : UiEvent {
     data class OnTyping(val isTyping: Boolean) : ChatRoomEvent()
     data class OnMessageRead(val messageId: String) : ChatRoomEvent()
     object OnMediaClicked : ChatRoomEvent()
+    data class OnMediaSelected(val uri: Uri, val isImage: Boolean) : ChatRoomEvent()
 }
 
 sealed class ChatRoomEffect : UiEffect {
     object ScrollToBottom : ChatRoomEffect()
     data class ShowError(val message: String) : ChatRoomEffect()
+    object PickMedia : ChatRoomEffect()
 }

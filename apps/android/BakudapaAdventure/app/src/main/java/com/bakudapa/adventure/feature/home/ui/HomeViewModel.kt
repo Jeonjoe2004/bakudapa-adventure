@@ -40,6 +40,9 @@ class HomeViewModel @Inject constructor(
             is HomeEvent.OnPostClicked -> {
                 sendEffect(HomeEffect.NavigateToPostDetail(event.postId))
             }
+            HomeEvent.OnViewAllMountainsClicked -> {
+                sendEffect(HomeEffect.NavigateToMountainList)
+            }
         }
     }
 

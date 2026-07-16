@@ -20,6 +20,7 @@ sealed class Screen(val route: String) {
     object Home : Screen("home")
     object Map : Screen("map")
     object Tracking : Screen("tracking")
+    object MountainList : Screen("mountain_list")
     object Feed : Screen("feed")
     object CreatePost : Screen("create_post")
     object Comments : Screen("comments")
@@ -29,12 +30,18 @@ sealed class Screen(val route: String) {
     object Emergency : Screen("emergency")
     object Badge : Screen("badge")
     object Settings : Screen("settings")
+    object Leaderboard : Screen("leaderboard")
+    object UserProfile : Screen("user_profile/{userId}") {
+        fun createRoute(userId: String) = "user_profile/$userId"
+    }
     object MountainDetail : Screen("mountain_detail/{mountainId}") {
         fun createRoute(mountainId: String) = "mountain_detail/$mountainId"
     }
     object TrailDetail : Screen("trail_detail/{trailId}") {
         fun createRoute(trailId: String) = "trail_detail/$trailId"
     }
+    object EditProfile : Screen("edit_profile")
+    object TrailUpload : Screen("trail_upload")
 
     fun withArgs(vararg args: String): String {
         return buildString {

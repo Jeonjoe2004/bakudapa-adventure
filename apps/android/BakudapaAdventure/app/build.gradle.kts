@@ -9,16 +9,20 @@ plugins {
 
 android {
     namespace = "com.bakudapa.adventure"
-    compileSdk = 37
+    compileSdk = 35
 
     defaultConfig {
         applicationId = "com.bakudapa.adventure"
         minSdk = 24
-        targetSdk = 37
+        targetSdk = 35
         versionCode = 1
         versionName = "1.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+
+        // Weather API key — set via local.properties or CI env
+        val weatherKey: String = project.findProperty("WEATHER_API_KEY") as? String ?: "CHANGE_ME"
+        buildConfigField("String", "WEATHER_API_KEY", "\"$weatherKey\"")
     }
 
     buildTypes {
@@ -29,6 +33,12 @@ android {
                 "proguard-rules.pro"
             )
         }
+        debug {
+            // Disable native symbol stripping for debug builds to avoid environment issues
+            packagingOptions {
+                doNotStrip("*")
+            }
+        }
     }
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_11
@@ -36,6 +46,7 @@ android {
     }
     buildFeatures {
         compose = true
+        buildConfig = true
     }
 }
 

@@ -1,11 +1,19 @@
 package com.bakudapa.adventure.feature.trail.domain.model
 
+import com.bakudapa.adventure.feature.mountain.domain.model.MountainDifficulty
+
+data class Checkpoint(
+    val name: String,
+    val elevation: Int,
+    val eta: String,
+)
+
 data class TrailDetail(
     val id: String,
     val name: String,
     val mountainId: String,
     val mountainName: String,
-    val difficulty: String,
+    val difficulty: MountainDifficulty = MountainDifficulty.MODERATE,
     val durationMinutes: Int,
     val distanceKm: Double,
     val imageUrl: String,
@@ -14,6 +22,6 @@ data class TrailDetail(
     val elevationGain: Int = 0,
     val maxElevation: Int = 0,
     val recommendedGear: List<String> = emptyList(),
-    val waterSources: List<String> = emptyList(),
-    val campingSpots: List<String> = emptyList(),
+    val pointsOfInterest: List<PointOfInterest> = emptyList(),
+    val checkpoints: List<Checkpoint> = emptyList(),
 )

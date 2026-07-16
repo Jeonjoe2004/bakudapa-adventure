@@ -6,7 +6,9 @@ import LoadingState from '../components/LoadingState'
 import EmptyState from '../components/EmptyState'
 import ErrorState from '../components/ErrorState'
 
-interface Mountain { id: string; name: string; location: string; elevation: number; rating: number; imageUrl: string }
+interface Mountain { id: string; name: string; location: string; elevation: number; rating: number; imageUrl: string; difficulty?: string; description?: string; bestSeason?: string; latitude?: number; longitude?: number; distance?: number }
+
+const DIFFICULTIES = ['EASY', 'MODERATE', 'HARD', 'EXPERT']
 
 export default function MountainsPage() {
   const [mountains, setMountains] = useState<Mountain[]>([])
@@ -15,7 +17,7 @@ export default function MountainsPage() {
   const [search, setSearch] = useState('')
   const [editing, setEditing] = useState<Mountain | null>(null)
   const [showForm, setShowForm] = useState(false)
-  const [form, setForm] = useState({ name: '', location: '', elevation: 0, rating: 0, imageUrl: '' })
+  const [form, setForm] = useState({ name: '', location: '', elevation: 0, rating: 0, imageUrl: '', difficulty: 'MODERATE', description: '', bestSeason: '', latitude: 0, longitude: 0, distance: 0 })
 
   const fetchMountains = async () => {
     try {
@@ -34,22 +36,28 @@ export default function MountainsPage() {
 
   const openCreate = () => {
     setEditing(null)
-    setForm({ name: '', location: '', elevation: 0, rating: 0, imageUrl: '' })
+    setForm({ name: '', location: '', elevation: 0, rating: 0, imageUrl: '', difficulty: 'MODERATE', description: '', bestSeason: '', latitude: 0, longitude: 0, distance: 0 })
     setShowForm(true)
   }
 
   const openEdit = (m: Mountain) => {
     setEditing(m)
-    setForm({ name: m.name, location: m.location, elevation: m.elevation, rating: m.rating, imageUrl: m.imageUrl })
+    setForm({
+      name: m.name, location: m.location, elevation: m.elevation, rating: m.rating,
+      imageUrl: m.imageUrl, difficulty: m.difficulty || 'MODERATE',
+      description: m.description || '', bestSeason: m.bestSeason || '',
+      latitude: m.latitude || 0, longitude: m.longitude || 0, distance: m.distance || 0
+    })
     setShowForm(true)
   }
 
   const handleSave = async () => {
     try {
+      const data = form
       if (editing) {
-        await updateDoc(doc(db, 'mountains', editing.id), form)
+        await updateDoc(doc(db, 'mountains', editing.id), data)
       } else {
-        await addDoc(collection(db, 'mountains'), form)
+        await addDoc(collection(db, 'mountains'), data)
       }
       setShowForm(false)
       fetchMountains()
@@ -58,10 +66,8 @@ export default function MountainsPage() {
 
   const handleDelete = async (id: string) => {
     if (!confirm('Delete this mountain?')) return
-    try {
-      await deleteDoc(doc(db, 'mountains', id))
-      fetchMountains()
-    } catch (err: any) { setError(err.message) }
+    try { await deleteDoc(doc(db, 'mountains', id)); fetchMountains() }
+    catch (err: any) { setError(err.message) }
   }
 
   if (loading) return <LoadingState />
@@ -84,30 +90,57 @@ export default function MountainsPage() {
 
       {!filtered.length && <EmptyState message={search ? 'No mountains match your search' : 'No mountains yet'} />}
 
-      {/* Form Modal */}
       {showForm && (
         <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50" onClick={() => setShowForm(false)}>
-          <div className="bg-white rounded-xl shadow-xl p-6 w-full max-w-md space-y-4" onClick={e => e.stopPropagation()}>
+          <div className="bg-white rounded-xl shadow-xl p-6 w-full max-w-lg space-y-4 max-h-[90vh] overflow-y-auto" onClick={e => e.stopPropagation()}>
             <h2 className="text-lg font-bold">{editing ? 'Edit Mountain' : 'Add Mountain'}</h2>
-            {['name', 'location', 'imageUrl'].map(f => (
-              <div key={f}>
-                <label className="text-sm font-medium text-gray-700 capitalize">{f}</label>
-                <input value={(form as any)[f]} onChange={e => setForm({ ...form, [f]: e.target.value })}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 mt-1" />
-              </div>
-            ))}
+            <Input label="Name" value={form.name} onChange={v => setForm({ ...form, name: v })} />
+            <Input label="Location" value={form.location} onChange={v => setForm({ ...form, location: v })} />
             <div className="flex gap-4">
-              <div>
+              <div className="flex-1">
                 <label className="text-sm font-medium text-gray-700">Elevation (m)</label>
                 <input type="number" value={form.elevation} onChange={e => setForm({ ...form, elevation: +e.target.value })}
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 mt-1" />
               </div>
-              <div>
+              <div className="flex-1">
                 <label className="text-sm font-medium text-gray-700">Rating</label>
                 <input type="number" step="0.1" value={form.rating} onChange={e => setForm({ ...form, rating: +e.target.value })}
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 mt-1" />
               </div>
             </div>
+            <div className="flex gap-4">
+              <div className="flex-1">
+                <label className="text-sm font-medium text-gray-700">Difficulty</label>
+                <select value={form.difficulty} onChange={e => setForm({ ...form, difficulty: e.target.value })}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 mt-1">
+                  {DIFFICULTIES.map(d => <option key={d} value={d}>{d}</option>)}
+                </select>
+              </div>
+              <div className="flex-1">
+                <label className="text-sm font-medium text-gray-700">Distance (km)</label>
+                <input type="number" step="0.1" value={form.distance} onChange={e => setForm({ ...form, distance: +e.target.value })}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 mt-1" />
+              </div>
+            </div>
+            <div className="flex gap-4">
+              <div className="flex-1">
+                <label className="text-sm font-medium text-gray-700">Latitude</label>
+                <input type="number" step="0.0001" value={form.latitude} onChange={e => setForm({ ...form, latitude: +e.target.value })}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 mt-1" />
+              </div>
+              <div className="flex-1">
+                <label className="text-sm font-medium text-gray-700">Longitude</label>
+                <input type="number" step="0.0001" value={form.longitude} onChange={e => setForm({ ...form, longitude: +e.target.value })}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 mt-1" />
+              </div>
+            </div>
+            <Input label="Best Season" value={form.bestSeason} onChange={v => setForm({ ...form, bestSeason: v })} placeholder="e.g. Jun-Oct" />
+            <div>
+              <label className="text-sm font-medium text-gray-700">Description</label>
+              <textarea value={form.description} onChange={e => setForm({ ...form, description: e.target.value })} rows={3} placeholder="Mountain description..."
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 mt-1" />
+            </div>
+            <Input label="Image URL" value={form.imageUrl} onChange={v => setForm({ ...form, imageUrl: v })} />
             <div className="flex justify-end gap-2 pt-2">
               <button onClick={() => setShowForm(false)} className="px-4 py-2 text-sm text-gray-600 hover:bg-gray-100 rounded-lg transition">Cancel</button>
               <button onClick={handleSave} className="px-4 py-2 text-sm bg-emerald-700 text-white rounded-lg hover:bg-emerald-800 transition">{editing ? 'Update' : 'Create'}</button>
@@ -124,7 +157,8 @@ export default function MountainsPage() {
             </div>
             <div className="flex-1 min-w-0">
               <p className="font-semibold text-gray-800 truncate">{m.name}</p>
-              <p className="text-sm text-gray-500">{m.location} • {m.elevation}m • ⭐ {m.rating}</p>
+              <p className="text-sm text-gray-500">{m.location} • {m.elevation}m • {m.difficulty || 'MODERATE'} • ⭐ {m.rating}</p>
+              {m.description && <p className="text-xs text-gray-400 mt-1 truncate">{m.description}</p>}
             </div>
             <div className="flex gap-1">
               <button onClick={() => openEdit(m)} className="p-2 text-gray-500 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition"><Pencil size={18} /></button>
@@ -133,6 +167,16 @@ export default function MountainsPage() {
           </div>
         ))}
       </div>
+    </div>
+  )
+}
+
+function Input({ label, value, onChange, placeholder }: { label: string; value: string; onChange: (v: string) => void; placeholder?: string }) {
+  return (
+    <div>
+      <label className="text-sm font-medium text-gray-700">{label}</label>
+      <input value={value} onChange={e => onChange(e.target.value)} placeholder={placeholder}
+        className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 mt-1" />
     </div>
   )
 }
