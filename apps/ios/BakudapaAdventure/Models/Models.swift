@@ -1,4 +1,5 @@
 import Foundation
+import FirebaseFirestore
 
 struct Mountain: Codable, Identifiable {
     let id: String
@@ -58,7 +59,7 @@ struct Message: Codable, Identifiable {
     let senderId: String
     let senderName: String
     let text: String
-    let timestamp: TimeInterval
+    let timestamp: Timestamp?
 }
 
 struct UserProfile: Codable, Identifiable {
