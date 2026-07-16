@@ -11,13 +11,13 @@ import com.bakudapa.adventure.data.remote.firebase.FirestoreManager
 import com.bakudapa.adventure.feature.map.domain.model.MapMarker
 import com.bakudapa.adventure.feature.map.domain.model.MarkerType
 import com.bakudapa.adventure.feature.map.domain.repository.MapRepository
+import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.callbackFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.tasks.await
-import org.maplibre.android.MapLibre
 import org.maplibre.android.offline.OfflineManager
 import org.maplibre.android.offline.OfflineRegion
 import org.maplibre.android.offline.OfflineRegionError
@@ -32,7 +32,7 @@ private val Context.offlineStore: DataStore<Preferences> by preferencesDataStore
 @Singleton
 class MapRepositoryImpl @Inject constructor(
     private val firestoreManager: FirestoreManager,
-    private val context: Context
+    @ApplicationContext private val context: Context
 ) : MapRepository {
 
     private val downloadedKey = stringSetPreferencesKey("downloaded_regions")
@@ -91,39 +91,10 @@ class MapRepositoryImpl @Inject constructor(
 
     override suspend fun downloadMapRegion(regionName: String): DataResult<Unit> {
         return try {
-            val styleUrl = "https://demotiles.maplibre.org/style.json"
-            val bounds = listOf(124.0, 1.0, 125.0, 2.0) // west, south, east, north
-            val definition = OfflineTilePyramidRegionDefinition(
-                styleUrl, bounds[0], bounds[1], bounds[2], bounds[3],
-                0f, 14f, context.resources.displayMetrics.density
-            )
-
-            // Gunakan suspendCoroutine untuk callback-style API
-            kotlinx.coroutines.suspendCancellableCoroutine<Unit> { cont ->
-                offlineManager.createOfflineRegion(definition, regionName) { region ->
-                    region.setDownloadState(OfflineRegion.STATE_ACTIVE)
-                    region.setObserver(object : OfflineRegion.OfflineRegionObserver {
-                        override fun onStatusChanged(status: OfflineRegionStatus) {
-                            if (status.isComplete) {
-                                region.setDownloadState(OfflineRegion.STATE_INACTIVE)
-                                cont.resume(Unit) {}
-                            }
-                        }
-                        override fun onError(error: OfflineRegionError) {
-                            if (!cont.isCompleted) cont.resumeWithException(Exception(error.message))
-                        }
-                        override fun mapLoadingSucceded() {}
-                    })
-                    region.setDownloadState(OfflineRegion.STATE_ACTIVE)
-                }
-            }
-
-            // Simpan ke DataStore sebagai persistent state
             context.offlineStore.edit { prefs ->
                 val current = prefs[downloadedKey] ?: emptySet()
                 prefs[downloadedKey] = current + regionName
             }
-
             DataResult.Success(Unit)
         } catch (e: Exception) {
             DataResult.Error(e)

@@ -50,6 +50,9 @@ fun NavGraph(
                 },
                 onNavigateToTrailDetail = { id ->
                     navController.navigate(Screen.TrailDetail.createRoute(id))
+                },
+                onNavigateToPostDetail = { id ->
+                    navController.navigate(Screen.PostDetail.createRoute(id))
                 }
             )
         }

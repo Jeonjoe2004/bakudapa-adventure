@@ -7,8 +7,8 @@ import com.bakudapa.adventure.core.data.DataResult
 import com.bakudapa.adventure.feature.chat.domain.model.MessageMediaType
 import com.bakudapa.adventure.feature.chat.domain.repository.ChatRepository
 import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.ktx.Firebase
-import com.google.firebase.storage.ktx.storage
+import com.google.firebase.storage.FirebaseStorage
+import kotlinx.coroutines.tasks.await
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
@@ -24,7 +24,7 @@ class ChatRoomViewModel @Inject constructor(
 
     private var currentRoomId: String? = null
     private var typingJob: Job? = null
-    private val storageRef = Firebase.storage.reference
+    private val storageRef = FirebaseStorage.getInstance().reference
 
     override fun onEvent(event: ChatRoomEvent) {
         when (event) {
@@ -53,11 +53,13 @@ class ChatRoomViewModel @Inject constructor(
         viewModelScope.launch {
             try {
                 val fileName = "chat/${roomId}/${UUID.randomUUID()}"
-                val downloadUrl = if (isImage) {
-                    storageRef.child("$fileName.jpg").putFile(uri).await().storage.downloadUrl.await().toString()
+                val uploadTask = if (isImage) {
+                    storageRef.child("$fileName.jpg").putFile(uri)
                 } else {
-                    storageRef.child(fileName).putFile(uri).await().storage.downloadUrl.await().toString()
+                    storageRef.child(fileName).putFile(uri)
                 }
+                uploadTask.await()
+                val downloadUrl = storageRef.child(if (isImage) "$fileName.jpg" else fileName).downloadUrl.await().toString()
                 repository.sendMessage(
                     roomId = roomId,
                     content = if (isImage) "📷 Photo" else "📎 File",

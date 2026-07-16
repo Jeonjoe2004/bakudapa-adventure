@@ -11,8 +11,11 @@ import com.bakudapa.adventure.feature.tracking.data.local.HikingRouteDao
 import com.bakudapa.adventure.feature.tracking.domain.model.HikingRoute
 import com.bakudapa.adventure.feature.tracking.domain.model.TrackingPoint
 import com.google.firebase.auth.FirebaseAuth
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.*
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -24,6 +27,8 @@ class ProfileRepositoryImpl @Inject constructor(
     private val hikingRouteDao: HikingRouteDao
 ) : ProfileRepository {
 
+    private val ioScope = CoroutineScope(Dispatchers.IO)
+
     override fun getUserProfile(userId: String): Flow<DataResult<UserProfile>> = callbackFlow {
         val listener = firestoreManager.getCollection("users").document(userId)
             .addSnapshotListener { snapshot, error ->
@@ -31,28 +36,23 @@ class ProfileRepositoryImpl @Inject constructor(
                     trySend(DataResult.Error(error))
                     return@addSnapshotListener
                 }
-
                 val name = snapshot?.getString("displayName") ?: "Adventurer"
                 val photoUrl = snapshot?.getString("photoUrl")
                 val email = snapshot?.getString("email") ?: ""
                 val level = snapshot?.getLong("level")?.toInt() ?: 1
                 val xp = snapshot?.getLong("xp")?.toInt() ?: 0
-
-                // Compute stats from Room database (non-blocking for callbackFlow)
-                launch {
+                ioScope.launch {
                     val routes = hikingRouteDao.getAllRoutes().firstOrNull().orEmpty()
                     val totalDist = routes.sumOf { it.distanceMeters / 1000.0 }
                     val totalElev = routes.maxOfOrNull { it.maxElevation.toInt() } ?: 0
                     val climbs = routes.size
                     val totalHrs = routes.sumOf { (it.durationMillis / 3600000.0) }
-
-                        val profile = UserProfile(
-                            id = userId, name = name, email = email,
-                            photoUrl = photoUrl, level = level, xp = xp,
-                            stats = UserStats(totalDist, totalElev, climbs, totalHrs)
-                        )
-                        trySend(DataResult.Success(profile))
-                    }
+                    val profile = UserProfile(
+                        id = userId, name = name, email = email,
+                        photoUrl = photoUrl, level = level, xp = xp,
+                        stats = UserStats(totalDist, totalElev, climbs, totalHrs)
+                    )
+                    trySend(DataResult.Success(profile))
                 }
             }
         awaitClose { listener.remove() }
@@ -72,7 +72,7 @@ class ProfileRepositoryImpl @Inject constructor(
         awaitClose { listener.remove() }
     }
 
-    override fun getMyRoutes(userId: String): Flow<DataResult<List<HikingRoute>>> = 
+    override fun getMyRoutes(userId: String): Flow<DataResult<List<HikingRoute>>> =
         hikingRouteDao.getAllRoutes().map { entities ->
             DataResult.Success(entities.map { it.toDomain() })
         }
@@ -80,10 +80,7 @@ class ProfileRepositoryImpl @Inject constructor(
     override suspend fun updateProfile(name: String, photoUrl: String?): DataResult<Unit> {
         return try {
             val user = auth.currentUser ?: throw Exception("Not authenticated")
-            val updates = mapOf(
-                "displayName" to name,
-                "photoUrl" to photoUrl
-            )
+            val updates = mapOf("displayName" to name, "photoUrl" to photoUrl)
             firestoreManager.getCollection("users").document(user.uid).update(updates).await()
             DataResult.Success(Unit)
         } catch (e: Exception) {
@@ -130,20 +127,15 @@ class ProfileRepositoryImpl @Inject constructor(
     }
 
     override fun getFollowers(userId: String): Flow<DataResult<List<FollowUser>>> = callbackFlow {
-        val ref = firestoreManager.getCollection("users").document(userId)
-            .collection("followers")
+        val ref = firestoreManager.getCollection("users").document(userId).collection("followers")
         val listener = ref.addSnapshotListener { snapshot, _ ->
             if (snapshot == null) return@addSnapshotListener
-            launch {
+            kotlinx.coroutines.CoroutineScope(Dispatchers.IO).launch {
                 val users = snapshot.documents.mapNotNull { doc ->
-                    runCatching {
+                    try {
                         val userDoc = firestoreManager.getCollection("users").document(doc.id).get().await()
-                        FollowUser(
-                            id = doc.id,
-                            name = userDoc.getString("displayName") ?: "Adventurer",
-                            photoUrl = userDoc.getString("photoUrl")
-                        )
-                    }.getOrNull()
+                        FollowUser(id = doc.id, name = userDoc.getString("displayName") ?: "Adventurer", photoUrl = userDoc.getString("photoUrl"))
+                    } catch (_: Exception) { null }
                 }
                 trySend(DataResult.Success(users))
             }
@@ -152,20 +144,15 @@ class ProfileRepositoryImpl @Inject constructor(
     }
 
     override fun getFollowing(userId: String): Flow<DataResult<List<FollowUser>>> = callbackFlow {
-        val ref = firestoreManager.getCollection("users").document(userId)
-            .collection("following")
+        val ref = firestoreManager.getCollection("users").document(userId).collection("following")
         val listener = ref.addSnapshotListener { snapshot, _ ->
             if (snapshot == null) return@addSnapshotListener
-            launch {
+            kotlinx.coroutines.CoroutineScope(Dispatchers.IO).launch {
                 val users = snapshot.documents.mapNotNull { doc ->
-                    runCatching {
+                    try {
                         val userDoc = firestoreManager.getCollection("users").document(doc.id).get().await()
-                        FollowUser(
-                            id = doc.id,
-                            name = userDoc.getString("displayName") ?: "Adventurer",
-                            photoUrl = userDoc.getString("photoUrl")
-                        )
-                    }.getOrNull()
+                        FollowUser(id = doc.id, name = userDoc.getString("displayName") ?: "Adventurer", photoUrl = userDoc.getString("photoUrl"))
+                    } catch (_: Exception) { null }
                 }
                 trySend(DataResult.Success(users))
             }
@@ -176,9 +163,8 @@ class ProfileRepositoryImpl @Inject constructor(
     override fun getFollowersCount(userId: String): Flow<DataResult<Int>> = callbackFlow {
         val listener = firestoreManager.getCollection("users").document(userId)
             .collection("followers")
-            .addSnapshotListener { snapshot, error ->
-                if (error != null) { trySend(DataResult.Error(error)); return@addSnapshotListener }
-                trySend(DataResult.Success(snapshot?.size() ?: 0))
+            .addSnapshotListener { snapshot, _ ->
+                trySend(DataResult.Success(snapshot?.documents?.size ?: 0))
             }
         awaitClose { listener.remove() }
     }
@@ -186,23 +172,15 @@ class ProfileRepositoryImpl @Inject constructor(
     override fun getFollowingCount(userId: String): Flow<DataResult<Int>> = callbackFlow {
         val listener = firestoreManager.getCollection("users").document(userId)
             .collection("following")
-            .addSnapshotListener { snapshot, error ->
-                if (error != null) { trySend(DataResult.Error(error)); return@addSnapshotListener }
-                trySend(DataResult.Success(snapshot?.size() ?: 0))
+            .addSnapshotListener { snapshot, _ ->
+                trySend(DataResult.Success(snapshot?.documents?.size ?: 0))
             }
         awaitClose { listener.remove() }
     }
 
     private fun com.bakudapa.adventure.feature.tracking.data.local.HikingRouteEntity.toDomain() = HikingRoute(
-        id = id,
-        name = name,
-        distanceMeters = distanceMeters,
-        durationMillis = durationMillis,
-        avgSpeed = avgSpeed,
-        maxElevation = maxElevation,
-        minElevation = minElevation,
-        calories = calories,
-        startTime = startTime,
-        endTime = endTime
+        id = id, name = name, distanceMeters = distanceMeters, durationMillis = durationMillis,
+        avgSpeed = avgSpeed, maxElevation = maxElevation, minElevation = minElevation,
+        calories = calories, startTime = startTime, endTime = endTime
     )
 }

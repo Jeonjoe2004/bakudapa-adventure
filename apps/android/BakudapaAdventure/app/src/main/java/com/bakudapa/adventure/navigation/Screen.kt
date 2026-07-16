@@ -42,6 +42,9 @@ sealed class Screen(val route: String) {
     }
     object EditProfile : Screen("edit_profile")
     object TrailUpload : Screen("trail_upload")
+    object PostDetail : Screen("post_detail/{postId}") {
+        fun createRoute(postId: String) = "post_detail/$postId"
+    }
 
     fun withArgs(vararg args: String): String {
         return buildString {
