@@ -39,10 +39,19 @@
             android:exported="false"
             android:foregroundServiceType="location" />
 
-        <!-- MapLibre — key dari MapTiler Cloud -->
+        <!-- FCM Service -->
+        <service
+            android:name=".data.remote.firebase.FcmService"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="com.google.firebase.MESSAGING_EVENT" />
+            </intent-filter>
+        </service>
+
+        <!-- MapLibre — key dari MapTiler Cloud, via local.properties -->
         <meta-data
             android:name="com.maplibre.API_KEY"
-            android:value="U5vVZAqDgrDLsleNLnAc" />
+            android:value="${MAPTILER_API_KEY}" />
 
     </application>
 

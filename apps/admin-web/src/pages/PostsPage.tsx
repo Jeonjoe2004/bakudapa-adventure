@@ -1,9 +1,10 @@
 import { useEffect, useState } from 'react'
 import {
-  collection, getDocs, deleteDoc, doc,
+  collection, getDocs,
   query, orderBy, Timestamp
 } from 'firebase/firestore'
-import { db } from '../firebase'
+import { httpsCallable } from 'firebase/functions'
+import { db, functions } from '../firebase'
 import { Trash2, Eye, Search, MessageSquare } from 'lucide-react'
 import LoadingState from '../components/LoadingState'
 import EmptyState from '../components/EmptyState'
@@ -47,11 +48,12 @@ export default function PostsPage() {
 
   const doDelete = async (id: string) => {
     try {
-      await deleteDoc(doc(db, 'posts', id))
+      const fn = httpsCallable(functions, 'deletePost')
+      await fn({ id })
       setPosts(p => p.filter(x => x.id !== id))
       setShowDelete(null)
     } catch (e: any) {
-      alert('Gagal menghapus: ' + e.message)
+      alert('Gagal menghapus: ' + (e.message || 'Unknown error'))
     }
   }
 

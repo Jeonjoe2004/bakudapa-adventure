@@ -6,6 +6,8 @@ import com.bakudapa.adventure.core.data.DataResult
 import com.bakudapa.adventure.feature.profile.domain.repository.ProfileRepository
 import com.google.firebase.auth.FirebaseAuth
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -15,6 +17,8 @@ class ProfileViewModel @Inject constructor(
     private val auth: FirebaseAuth,
     private val repository: ProfileRepository
 ) : BaseViewModel<ProfileState, ProfileEvent, ProfileEffect>(ProfileState()) {
+
+    private var searchJob: Job? = null
 
     init {
         loadProfile()
@@ -30,7 +34,7 @@ class ProfileViewModel @Inject constructor(
             ProfileEvent.OnFollowingClicked -> sendEffect(ProfileEffect.NavigateToFollowing)
             is ProfileEvent.OnSaveProfile -> {
                 viewModelScope.launch {
-                    repository.updateProfile(event.name, event.photoUrl).also { result ->
+                    repository.updateProfile(event.name, event.username, event.bio, event.website, event.photoUrl).also { result ->
                         when (result) {
                             is DataResult.Success -> {
                                 sendEffect(ProfileEffect.ShowToast("Profile updated"))
@@ -41,6 +45,26 @@ class ProfileViewModel @Inject constructor(
                         }
                     }
                 }
+            }
+            is ProfileEvent.OnSearchQueryChanged -> handleSearchQuery(event.query)
+            is ProfileEvent.OnUserClicked -> sendEffect(ProfileEffect.NavigateToUserProfile(event.userId))
+        }
+    }
+
+    private fun handleSearchQuery(query: String) {
+        setState { it.copy(searchQuery = query) }
+        searchJob?.cancel()
+        if (query.isBlank()) {
+            setState { it.copy(searchResults = emptyList(), isSearching = false) }
+            return
+        }
+        searchJob = viewModelScope.launch {
+            delay(400)
+            setState { it.copy(isSearching = true) }
+            when (val result = repository.searchUsers(query)) {
+                is DataResult.Success -> setState { it.copy(searchResults = result.data, isSearching = false) }
+                is DataResult.Error -> setState { it.copy(isSearching = false) }
+                DataResult.Loading -> {}
             }
         }
     }

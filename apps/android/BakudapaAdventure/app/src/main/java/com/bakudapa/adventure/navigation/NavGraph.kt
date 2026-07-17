@@ -20,6 +20,7 @@ import com.bakudapa.adventure.feature.profile.ui.EditProfileScreen
 import com.bakudapa.adventure.feature.profile.ui.ProfileScreen
 import com.bakudapa.adventure.feature.profile.ui.UserProfileScreen
 import com.bakudapa.adventure.feature.settings.ui.SettingsScreen
+import com.bakudapa.adventure.feature.story.ui.StoryViewerScreen
 import com.bakudapa.adventure.feature.trail.ui.TrailDetailScreen
 import com.bakudapa.adventure.feature.trail.ui.TrailUploadScreen
 import com.bakudapa.adventure.feature.tracking.ui.TrackingScreen
@@ -114,6 +115,9 @@ fun NavGraph(
                     navController.navigate(Screen.Auth.route) {
                         popUpTo(0) { inclusive = true }
                     }
+                },
+                onNavigateToUserProfile = { userId ->
+                    navController.navigate(Screen.UserProfile.createRoute(userId))
                 }
             )
         }
@@ -175,6 +179,18 @@ fun NavGraph(
         composable(Screen.TrailUpload.route) {
             TrailUploadScreen(
                 onNavigateBack = { navController.popBackStack() }
+            )
+        }
+
+        // Story Viewer
+        composable(
+            route = Screen.StoryViewer.route,
+            arguments = listOf(navArgument("userId") { type = NavType.StringType })
+        ) { backStackEntry ->
+            val userId = backStackEntry.arguments?.getString("userId") ?: return@composable
+            StoryViewerScreen(
+                userId = userId,
+                onClose = { navController.popBackStack() }
             )
         }
 

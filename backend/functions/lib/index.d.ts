@@ -3,5 +3,8 @@ export { seedData } from './seed';
 export { listMountains, getMountain, createMountain, updateMountain, deleteMountain } from './mountains';
 export { listTrails, getTrail, createTrail, updateTrail, deleteTrail } from './trails';
 export { deletePost } from './posts';
-export { getDashboardStats } from './stats';
+export { createArticle, listArticles } from './articles';
+export { getDashboardStats, scheduledStatsRefresh } from './stats';
+export { cleanupExpiredStories } from './stories';
+export { onPostLiked, onPostCommented, onFollowed } from './messaging';
 //# sourceMappingURL=index.d.ts.map

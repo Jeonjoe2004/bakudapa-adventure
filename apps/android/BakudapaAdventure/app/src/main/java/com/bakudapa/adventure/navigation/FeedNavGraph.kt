@@ -22,6 +22,9 @@ fun NavGraphBuilder.feedNavGraph(navController: NavHostController) {
                 },
                 onNavigateToCreatePost = {
                     navController.navigate(Screen.CreatePost.route)
+                },
+                onNavigateToStoryViewer = { userId ->
+                    navController.navigate(Screen.StoryViewer.createRoute(userId))
                 }
             )
         }

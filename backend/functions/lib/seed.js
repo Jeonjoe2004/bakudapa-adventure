@@ -34,6 +34,7 @@ exports.seedData = v2_1.https.onCall(async () => {
             email: 'admin@bakudapa.com',
             displayName: 'Admin Bakudapa',
             role: 'admin',
+            lastActiveAt: Date.now(),
             createdAt: Date.now(),
         });
         await (0, auth_1.getAuth)().setCustomUserClaims(userRecord.uid, { admin: true });

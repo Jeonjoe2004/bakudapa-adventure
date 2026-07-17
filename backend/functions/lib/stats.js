@@ -16,9 +16,22 @@ exports.getDashboardStats = v2_1.https.onCall(async () => {
         totalUsers: uSnap.data().count,
         totalTrails: tSnap.data().count,
         totalPosts: pSnap.data().count,
-        activeToday: 0,
+        activeToday: await estimateActiveToday(),
     };
 });
+/** Rough active-today estimate: users with activity in last 24h */
+async function estimateActiveToday() {
+    try {
+        const cutoff = Date.now() - 86_400_000;
+        const snap = await db.collection('users')
+            .where('lastActiveAt', '>', cutoff)
+            .count().get();
+        return snap.data().count;
+    }
+    catch {
+        return 0; // field may not exist yet — non-fatal
+    }
+}
 /** Refresh stats doc every 30 min */
 exports.scheduledStatsRefresh = v2_1.scheduler.onSchedule('*/30 * * * *', async () => {
     const [mSnap, uSnap, tSnap, pSnap] = await Promise.all([
@@ -32,7 +45,7 @@ exports.scheduledStatsRefresh = v2_1.scheduler.onSchedule('*/30 * * * *', async 
         totalUsers: uSnap.data().count,
         totalTrails: tSnap.data().count,
         totalPosts: pSnap.data().count,
-        activeToday: 0,
+        activeToday: await estimateActiveToday(),
         updatedAt: Date.now(),
     };
     await db.collection('stats').doc('dashboard').set(stats);

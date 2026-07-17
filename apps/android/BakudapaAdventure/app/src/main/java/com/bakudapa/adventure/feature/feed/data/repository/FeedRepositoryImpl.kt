@@ -10,9 +10,12 @@ import com.bakudapa.adventure.feature.feed.domain.model.Post
 import com.bakudapa.adventure.feature.feed.domain.repository.FeedRepository
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.Query
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.callbackFlow
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
 import java.util.*
 import javax.inject.Inject
@@ -37,18 +40,29 @@ class FeedRepositoryImpl @Inject constructor(
                     return@addSnapshotListener
                 }
 
-                val posts = snapshot?.documents?.mapNotNull { doc ->
-                    val post = doc.toObject(Post::class.java)?.copy(id = doc.id)
-                    // Check if current user liked/saved it
-                    post
+                val rawPosts = snapshot?.documents?.mapNotNull { doc ->
+                    doc.toObject(Post::class.java)?.copy(id = doc.id)
                 } ?: emptyList()
 
-                // Check liked status for each post
-                if (userId.isNotBlank() && posts.isNotEmpty()) {
-                    val fs = firestoreManager.getFirestore()
-                    trySend(DataResult.Success(posts))
+                if (userId.isNotBlank() && rawPosts.isNotEmpty()) {
+                    CoroutineScope(Dispatchers.IO).launch {
+                        val postsWithMeta = rawPosts.map { post ->
+                            var liked = false
+                            var saved = false
+                            try {
+                                val likeSnap = firestoreManager.getCollection("posts").document(post.id)
+                                    .collection("likes").document(userId).get().await()
+                                liked = likeSnap.exists()
+                                val savedSnap = firestoreManager.getCollection("users").document(userId)
+                                    .collection("savedPosts").document(post.id).get().await()
+                                saved = savedSnap.exists()
+                            } catch (_: Exception) {}
+                            post.copy(isLiked = liked, isSaved = saved)
+                        }
+                        trySend(DataResult.Success(postsWithMeta))
+                    }
                 } else {
-                    trySend(DataResult.Success(posts))
+                    trySend(DataResult.Success(rawPosts))
                 }
             }
 
@@ -174,6 +188,7 @@ class FeedRepositoryImpl @Inject constructor(
     override suspend fun addComment(postId: String, content: String): DataResult<Unit> {
         return try {
             val user = auth.currentUser ?: throw Exception("User not authenticated")
+            val postRef = firestoreManager.getCollection("posts").document(postId)
             val comment = Comment(
                 postId = postId,
                 authorId = user.uid,
@@ -182,7 +197,13 @@ class FeedRepositoryImpl @Inject constructor(
                 content = content,
                 timestamp = System.currentTimeMillis()
             )
-            firestoreManager.getCollection("posts").document(postId).collection("comments").add(comment).await()
+            firestoreManager.getFirestore().runTransaction { transaction ->
+                val snap = transaction.get(postRef)
+                val current = snap.getLong("commentsCount") ?: 0L
+                val newCommentRef = postRef.collection("comments").document()
+                transaction.set(newCommentRef, comment)
+                transaction.update(postRef, "commentsCount", current + 1)
+            }.await()
             DataResult.Success(Unit)
         } catch (e: Exception) {
             DataResult.Error(e)

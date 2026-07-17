@@ -20,9 +20,24 @@ android {
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 
-        // Weather API key — set via local.properties or CI env
-        val weatherKey: String = project.findProperty("WEATHER_API_KEY") as? String ?: "CHANGE_ME"
+        // Weather API key — set via local.properties
+        val weatherKey = rootProject.file("local.properties")
+            .takeIf { it.exists() }
+            ?.readLines()
+            ?.firstOrNull { it.startsWith("WEATHER_API_KEY=") }
+            ?.substringAfter("=")
+            ?: "CHANGE_ME"
         buildConfigField("String", "WEATHER_API_KEY", "\"$weatherKey\"")
+
+        // MapTiler API key — set via local.properties
+        val mapTilerKey = rootProject.file("local.properties")
+            .takeIf { it.exists() }
+            ?.readLines()
+            ?.firstOrNull { it.startsWith("MAPTILER_API_KEY=") }
+            ?.substringAfter("=")
+            ?: "CHANGE_ME"
+        buildConfigField("String", "MAPTILER_API_KEY", "\"$mapTilerKey\"")
+        manifestPlaceholders["MAPTILER_API_KEY"] = mapTilerKey
     }
 
     buildTypes {

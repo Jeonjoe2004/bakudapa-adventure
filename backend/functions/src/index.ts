@@ -5,3 +5,5 @@ export { listTrails, getTrail, createTrail, updateTrail, deleteTrail } from './t
 export { deletePost } from './posts'
 export { createArticle, listArticles } from './articles'
 export { getDashboardStats, scheduledStatsRefresh } from './stats'
+export { cleanupExpiredStories } from './stories'
+export { onPostLiked, onPostCommented, onFollowed } from './messaging'

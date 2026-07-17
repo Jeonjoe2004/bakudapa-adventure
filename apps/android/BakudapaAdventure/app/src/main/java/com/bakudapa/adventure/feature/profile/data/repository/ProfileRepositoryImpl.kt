@@ -41,6 +41,9 @@ class ProfileRepositoryImpl @Inject constructor(
                 val email = snapshot?.getString("email") ?: ""
                 val level = snapshot?.getLong("level")?.toInt() ?: 1
                 val xp = snapshot?.getLong("xp")?.toInt() ?: 0
+                val username = snapshot?.getString("username") ?: ""
+                val bio = snapshot?.getString("bio") ?: ""
+                val website = snapshot?.getString("website") ?: ""
                 ioScope.launch {
                     val routes = hikingRouteDao.getAllRoutes().firstOrNull().orEmpty()
                     val totalDist = routes.sumOf { it.distanceMeters / 1000.0 }
@@ -50,7 +53,8 @@ class ProfileRepositoryImpl @Inject constructor(
                     val profile = UserProfile(
                         id = userId, name = name, email = email,
                         photoUrl = photoUrl, level = level, xp = xp,
-                        stats = UserStats(totalDist, totalElev, climbs, totalHrs)
+                        stats = UserStats(totalDist, totalElev, climbs, totalHrs),
+                        username = username, bio = bio, website = website
                     )
                     trySend(DataResult.Success(profile))
                 }
@@ -77,10 +81,16 @@ class ProfileRepositoryImpl @Inject constructor(
             DataResult.Success(entities.map { it.toDomain() })
         }
 
-    override suspend fun updateProfile(name: String, photoUrl: String?): DataResult<Unit> {
+    override suspend fun updateProfile(name: String, username: String, bio: String, website: String, photoUrl: String?): DataResult<Unit> {
         return try {
             val user = auth.currentUser ?: throw Exception("Not authenticated")
-            val updates = mapOf("displayName" to name, "photoUrl" to photoUrl)
+            val updates = mapOf(
+                "displayName" to name,
+                "username" to username,
+                "bio" to bio,
+                "website" to website,
+                "photoUrl" to photoUrl
+            )
             firestoreManager.getCollection("users").document(user.uid).update(updates).await()
             DataResult.Success(Unit)
         } catch (e: Exception) {
@@ -176,6 +186,28 @@ class ProfileRepositoryImpl @Inject constructor(
                 trySend(DataResult.Success(snapshot?.documents?.size ?: 0))
             }
         awaitClose { listener.remove() }
+    }
+
+    override suspend fun searchUsers(query: String): DataResult<List<FollowUser>> {
+        return try {
+            val snap = firestoreManager.getCollection("users")
+                .orderBy("displayName")
+                .startAt(query)
+                .endAt(query + "")
+                .limit(20)
+                .get()
+                .await()
+            val users = snap.documents.mapNotNull { doc ->
+                FollowUser(
+                    id = doc.id,
+                    name = doc.getString("displayName") ?: "Adventurer",
+                    photoUrl = doc.getString("photoUrl")
+                )
+            }
+            DataResult.Success(users)
+        } catch (e: Exception) {
+            DataResult.Error(e)
+        }
     }
 
     private fun com.bakudapa.adventure.feature.tracking.data.local.HikingRouteEntity.toDomain() = HikingRoute(

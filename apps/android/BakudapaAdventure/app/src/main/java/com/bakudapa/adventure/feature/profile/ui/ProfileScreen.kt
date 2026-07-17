@@ -2,6 +2,7 @@ package com.bakudapa.adventure.feature.profile.ui
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -16,7 +17,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import coil.compose.rememberAsyncImagePainter
@@ -34,6 +38,7 @@ fun ProfileScreen(
     onNavigateToAuth: () -> Unit,
     onNavigateToFollowers: () -> Unit = {},
     onNavigateToFollowing: () -> Unit = {},
+    onNavigateToUserProfile: (String) -> Unit = {},
     viewModel: ProfileViewModel = hiltViewModel()
 ) {
     val state by viewModel.uiState.collectAsState()
@@ -49,6 +54,7 @@ fun ProfileScreen(
                 is ProfileEffect.ShowError -> snackbarHostState.showSnackbar(effect.message)
                 ProfileEffect.NavigateToFollowers -> onNavigateToFollowers()
                 ProfileEffect.NavigateToFollowing -> onNavigateToFollowing()
+                is ProfileEffect.NavigateToUserProfile -> onNavigateToUserProfile(effect.userId)
             }
         }
     }
@@ -91,25 +97,65 @@ fun ProfileScreen(
             )
         }
     ) { padding ->
-        if (state.isLoading && state.profile == null) {
-            Box(Modifier.fillMaxSize().padding(padding), contentAlignment = Alignment.Center) {
-                CircularProgressIndicator()
-            }
-            return@Scaffold
-        }
+        Column(Modifier.fillMaxSize().padding(padding)) {
+            // Search bar
+            OutlinedTextField(
+                value = state.searchQuery,
+                onValueChange = { viewModel.onEvent(ProfileEvent.OnSearchQueryChanged(it)) },
+                placeholder = { Text("Cari pendaki...") },
+                leadingIcon = { Icon(Icons.Default.Search, contentDescription = null) },
+                singleLine = true,
+                modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 8.dp),
+                shape = RoundedCornerShape(24.dp)
+            )
 
-        LazyColumn(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(padding)
-        ) {
+            if (state.searchQuery.isNotBlank()) {
+                // Search results
+                if (state.isSearching) {
+                    Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                        CircularProgressIndicator()
+                    }
+                } else if (state.searchResults.isEmpty()) {
+                    Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                        Text("Tidak ditemukan", style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.outline)
+                    }
+                } else {
+                    LazyColumn {
+                        items(state.searchResults) { user ->
+                            ListItem(
+                                headlineContent = { Text(user.name) },
+                                leadingContent = {
+                                    Icon(Icons.Default.Person, null, modifier = Modifier.size(40.dp))
+                                },
+                                modifier = Modifier.clickable {
+                                    viewModel.onEvent(ProfileEvent.OnUserClicked(user.id))
+                                }
+                            )
+                        }
+                    }
+                }
+            } else {
+                // Profile content (existing)
+                if (state.isLoading && state.profile == null) {
+                    Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                        CircularProgressIndicator()
+                    }
+                } else {
+                    LazyColumn {
             // ---- Header: Avatar + Nama + Level ----
             item {
                 ProfileHeader(
                     photoUrl = state.profile?.photoUrl,
                     name = state.profile?.name ?: "Petualang",
+                    username = state.profile?.username ?: "",
+                    bio = state.profile?.bio ?: "",
+                    website = state.profile?.website ?: "",
                     level = state.profile?.level ?: 1,
-                    xp = state.profile?.xp ?: 0
+                    xp = state.profile?.xp ?: 0,
+                    followersCount = state.followersCount,
+                    followingCount = state.followingCount,
+                    onFollowersClick = { viewModel.onEvent(ProfileEvent.OnFollowersClicked) },
+                    onFollowingClick = { viewModel.onEvent(ProfileEvent.OnFollowingClicked) }
                 )
             }
 
@@ -167,6 +213,9 @@ fun ProfileScreen(
             }
 
             item { Spacer(modifier = Modifier.height(80.dp)) }
+                    }
+                }
+            }
         }
     }
 }
@@ -177,8 +226,15 @@ fun ProfileScreen(
 private fun ProfileHeader(
     photoUrl: String?,
     name: String,
+    username: String,
+    bio: String,
+    website: String,
     level: Int,
-    xp: Int
+    xp: Int,
+    followersCount: Int = 0,
+    followingCount: Int = 0,
+    onFollowersClick: () -> Unit = {},
+    onFollowingClick: () -> Unit = {}
 ) {
     Column(
         modifier = Modifier
@@ -218,11 +274,61 @@ private fun ProfileHeader(
 
         Spacer(modifier = Modifier.height(12.dp))
         Text(text = name, style = MaterialTheme.typography.headlineSmall, fontWeight = FontWeight.Bold)
+        Spacer(modifier = Modifier.height(2.dp))
         Text(
-            text = "Level $level Explorer",
+            text = "@${username.ifBlank { "username" }}",
             style = MaterialTheme.typography.bodyMedium,
-            color = MaterialTheme.colorScheme.primary
+            color = MaterialTheme.colorScheme.outline
         )
+
+        // Bio
+        if (bio.isNotBlank()) {
+            Spacer(modifier = Modifier.height(4.dp))
+            Text(
+                text = bio,
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurface
+            )
+        }
+
+        // Website
+        if (website.isNotBlank()) {
+            Spacer(modifier = Modifier.height(2.dp))
+            Text(
+                text = website,
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.primary
+            )
+        }
+
+        Spacer(modifier = Modifier.height(12.dp))
+
+        // Followers / Following (like Instagram)
+        Row(
+            horizontalArrangement = Arrangement.spacedBy(24.dp),
+            modifier = Modifier.clickable(enabled = false) {} // placeholder
+        ) {
+            TextButton(onClick = onFollowersClick) {
+                Text(
+                    text = buildAnnotatedString {
+                        withStyle(SpanStyle(fontWeight = FontWeight.Bold)) { append("$followersCount") }
+                        append("  pengikut")
+                    },
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurface
+                )
+            }
+            TextButton(onClick = onFollowingClick) {
+                Text(
+                    text = buildAnnotatedString {
+                        withStyle(SpanStyle(fontWeight = FontWeight.Bold)) { append("$followingCount") }
+                        append("  mengikuti")
+                    },
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurface
+                )
+            }
+        }
 
         Spacer(modifier = Modifier.height(8.dp))
 

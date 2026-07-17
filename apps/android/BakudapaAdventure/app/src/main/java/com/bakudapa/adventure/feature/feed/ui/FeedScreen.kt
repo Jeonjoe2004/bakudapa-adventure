@@ -13,6 +13,7 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.bakudapa.adventure.feature.feed.ui.components.PostItem
 import com.bakudapa.adventure.core.ui.components.EmptyState
+import com.bakudapa.adventure.feature.story.ui.StoryBar
 import androidx.compose.material.icons.filled.RssFeed
 import kotlinx.coroutines.flow.collectLatest
 
@@ -21,6 +22,7 @@ import kotlinx.coroutines.flow.collectLatest
 fun FeedScreen(
     onNavigateToComments: (String) -> Unit,
     onNavigateToCreatePost: () -> Unit,
+    onNavigateToStoryViewer: (String) -> Unit = {},
     viewModel: FeedViewModel = hiltViewModel()
 ) {
     val state by viewModel.uiState.collectAsState()
@@ -61,6 +63,10 @@ fun FeedScreen(
                 )
             } else {
                 LazyColumn(modifier = Modifier.fillMaxSize()) {
+                    // Story bar di atas feed (Instagram-style)
+                    item {
+                        StoryBar(onUserStoryClick = onNavigateToStoryViewer)
+                    }
                     items(state.posts, key = { it.id }) { post ->
                         PostItem(
                             post = post,

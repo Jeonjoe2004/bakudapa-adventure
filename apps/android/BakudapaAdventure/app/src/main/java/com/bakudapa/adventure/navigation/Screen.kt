@@ -46,6 +46,12 @@ sealed class Screen(val route: String) {
         fun createRoute(postId: String) = "post_detail/$postId"
     }
 
+    // Stories
+    object StoryViewer : Screen("story_viewer/{userId}") {
+        fun createRoute(userId: String) = "story_viewer/$userId"
+    }
+    object CreateStory : Screen("create_story")
+
     fun withArgs(vararg args: String): String {
         return buildString {
             append(route)

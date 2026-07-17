@@ -11,7 +11,10 @@ interface ProfileRepository {
     fun getUserProfile(userId: String): Flow<DataResult<UserProfile>>
     fun getMyPosts(userId: String): Flow<DataResult<List<Post>>>
     fun getMyRoutes(userId: String): Flow<DataResult<List<HikingRoute>>>
-    suspend fun updateProfile(name: String, photoUrl: String?): DataResult<Unit>
+    suspend fun updateProfile(name: String, username: String, bio: String, website: String, photoUrl: String?): DataResult<Unit>
+
+    // Search users
+    suspend fun searchUsers(query: String): DataResult<List<FollowUser>>
 
     // Follow system
     suspend fun followUser(targetUserId: String): DataResult<Unit>

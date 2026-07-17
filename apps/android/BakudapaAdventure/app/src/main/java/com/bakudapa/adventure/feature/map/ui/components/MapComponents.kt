@@ -10,11 +10,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
+import com.bakudapa.adventure.BuildConfig
 import com.bakudapa.adventure.feature.map.domain.model.MapMarker
 import org.maplibre.android.MapLibre
 import org.maplibre.android.geometry.LatLng
 import org.maplibre.android.maps.MapView
-import org.maplibre.android.maps.MapLibreMap
 import org.maplibre.android.maps.Style
 import org.maplibre.android.camera.CameraUpdateFactory
 
@@ -34,26 +34,25 @@ fun MountainMap(
             factory = { ctx ->
                 MapView(ctx).also { mapView = it }.apply {
                     getMapAsync { map ->
-                        map.setStyle(Style.Builder().fromUri("https://demotiles.maplibre.org/style.json")) {
-                            // Populate
-                        }
-                        markers.forEach { marker ->
-                            map.addMarker(
-                                org.maplibre.android.annotations.MarkerOptions()
-                                    .position(LatLng(marker.latitude, marker.longitude))
-                                    .title(marker.title)
-                                    .snippet(marker.description)
-                            )
-                            markerMap[marker.title] = marker.id
-                        }
-                        map.moveCamera(CameraUpdateFactory.newLatLngZoom(
-                            LatLng(markers.firstOrNull()?.latitude ?: 1.45, markers.firstOrNull()?.longitude ?: 125.0),
-                            9.0
-                        ))
-                        map.setOnMarkerClickListener { clickedMarker ->
-                            val id = markerMap[clickedMarker.title]
-                            if (id != null) onMarkerClick(id)
-                            true
+                        map.setStyle(Style.Builder().fromUri("https://api.maptiler.com/maps/outdoor-v2/style.json?key=${BuildConfig.MAPTILER_API_KEY}")) {
+                            markers.forEach { marker ->
+                                map.addMarker(
+                                    org.maplibre.android.annotations.MarkerOptions()
+                                        .position(LatLng(marker.latitude, marker.longitude))
+                                        .title(marker.title)
+                                        .snippet(marker.description)
+                                )
+                                markerMap[marker.title] = marker.id
+                            }
+                            map.moveCamera(CameraUpdateFactory.newLatLngZoom(
+                                LatLng(markers.firstOrNull()?.latitude ?: 1.45, markers.firstOrNull()?.longitude ?: 125.0),
+                                9.0
+                            ))
+                            map.setOnMarkerClickListener { clickedMarker ->
+                                val id = markerMap[clickedMarker.title]
+                                if (id != null) onMarkerClick(id)
+                                true
+                            }
                         }
                     }
                 }
@@ -61,7 +60,9 @@ fun MountainMap(
             modifier = Modifier.fillMaxSize(),
             update = { view ->
                 view.getMapAsync { map ->
-                    map.removeAnnotations()
+                    // Clear stale markers, re-add current set
+                    map.markers?.forEach { it.remove() }
+                    markerMap.clear()
                     markers.forEach { marker ->
                         map.addMarker(
                             org.maplibre.android.annotations.MarkerOptions()

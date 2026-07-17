@@ -3,6 +3,9 @@ package com.bakudapa.adventure.feature.profile.domain.model
 data class UserProfile(
     val id: String,
     val name: String,
+    val username: String = "",
+    val bio: String = "",
+    val website: String = "",
     val email: String,
     val photoUrl: String?,
     val level: Int = 1,

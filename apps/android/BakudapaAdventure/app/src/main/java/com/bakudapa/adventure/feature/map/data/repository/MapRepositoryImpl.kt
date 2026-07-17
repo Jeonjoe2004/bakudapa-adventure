@@ -60,28 +60,6 @@ class MapRepositoryImpl @Inject constructor(
                 } catch (_: Exception) { null }
             })
 
-            val trailSnap = firestoreManager.getCollection("trails").get().await()
-            markers.addAll(trailSnap.documents.flatMap { trailDoc ->
-                val pois = trailDoc.get("pointsOfInterest")
-                if (pois !is List<*>) return@flatMap emptyList()
-                pois.mapNotNull { item ->
-                    if (item !is Map<*, *>) return@mapNotNull null
-                    try {
-                        val lat = (item["latitude"] as? Number)?.toDouble() ?: return@mapNotNull null
-                        val lng = (item["longitude"] as? Number)?.toDouble() ?: return@mapNotNull null
-                        val typeStr = (item["type"] as? String) ?: "TRAIL_HEAD"
-                        MapMarker(
-                            id = "${trailDoc.id}_${item["name"]}_${typeStr}",
-                            title = item["name"] as? String ?: "POI",
-                            description = item["description"] as? String ?: "",
-                            latitude = lat, longitude = lng,
-                            type = poiTypeToMarkerType(typeStr),
-                            elevation = (item["elevation"] as? Number)?.toInt()
-                        )
-                    } catch (_: Exception) { null }
-                }
-            })
-
             trySend(DataResult.Success(markers))
         } catch (e: Exception) {
             trySend(DataResult.Error(e))

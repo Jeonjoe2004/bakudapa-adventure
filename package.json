@@ -5,8 +5,8 @@
   "private": true,
   "scripts": {
     "seed": "node scripts/seed-firestore.mjs",
-    "dev:admin": "cd apps/admin-web && npm run dev",
-    "build:admin": "cd apps/admin-web && npm run build",
+    "dev:admin": "npm --prefix apps/admin-web run dev",
+    "build:admin": "npm --prefix apps/admin-web run build",
     "build:android": "cd apps/android/BakudapaAdventure && ./gradlew assembleDebug",
     "deploy:functions": "firebase deploy --only functions",
     "deploy:hosting": "firebase deploy --only hosting",
