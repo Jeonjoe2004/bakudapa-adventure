@@ -53,7 +53,7 @@ class TrackingRepositoryImpl @Inject constructor(
     override suspend fun resumeTracking() {
         _trackingStatus.value = TrackingStatus.START
         val intent = Intent(context, HikingService::class.java).apply {
-            action = HikingService.ACTION_START
+            action = HikingService.ACTION_RESUME
         }
         context.startService(intent)
     }

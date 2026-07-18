@@ -12,7 +12,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import com.bakudapa.adventure.BuildConfig
 import com.bakudapa.adventure.feature.map.domain.model.MapMarker
-import org.maplibre.android.MapLibre
 import org.maplibre.android.geometry.LatLng
 import org.maplibre.android.maps.MapView
 import org.maplibre.android.maps.Style
@@ -22,7 +21,13 @@ import org.maplibre.android.camera.CameraUpdateFactory
 fun MountainMap(
     markers: List<MapMarker>,
     userLocation: Pair<Double, Double>?,
+    userBearing: Float = 0f,
+    isFollowing: Boolean = false,
+    waypoints: List<Pair<Double, Double>> = emptyList(),
     onMarkerClick: (String) -> Unit,
+    onMapTap: (Pair<Double, Double>) -> Unit = {},
+    onAddWaypoint: (Pair<Double, Double>) -> Unit = {},
+    onRouteToSummit: (Pair<Double, Double>) -> Unit = {},
     modifier: Modifier = Modifier
 ) {
     val context = LocalContext.current
@@ -60,7 +65,6 @@ fun MountainMap(
             modifier = Modifier.fillMaxSize(),
             update = { view ->
                 view.getMapAsync { map ->
-                    // Clear stale markers, re-add current set
                     map.markers?.forEach { it.remove() }
                     markerMap.clear()
                     markers.forEach { marker ->

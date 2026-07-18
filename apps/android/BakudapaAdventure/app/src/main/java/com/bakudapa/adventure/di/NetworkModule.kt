@@ -1,6 +1,8 @@
 package com.bakudapa.adventure.di
 
 import com.bakudapa.adventure.feature.home.data.remote.WeatherApi
+import com.bakudapa.adventure.feature.map.data.remote.OSRMService
+import com.bakudapa.adventure.feature.weather.data.remote.WeatherAlertApi
 import com.jakewharton.retrofit2.converter.kotlinx.serialization.asConverterFactory
 import dagger.Module
 import dagger.Provides
@@ -36,5 +38,27 @@ object NetworkModule {
             .addConverterFactory(json.asConverterFactory("application/json".toMediaType()))
             .build()
             .create(WeatherApi::class.java)
+    }
+
+    @Provides
+    @Singleton
+    fun provideOSRMService(okHttpClient: OkHttpClient, json: Json): OSRMService {
+        return Retrofit.Builder()
+            .baseUrl("https://router.project-osrm.org/")
+            .client(okHttpClient)
+            .addConverterFactory(json.asConverterFactory("application/json".toMediaType()))
+            .build()
+            .create(OSRMService::class.java)
+    }
+
+    @Provides
+    @Singleton
+    fun provideWeatherAlertApi(okHttpClient: OkHttpClient, json: Json): WeatherAlertApi {
+        return Retrofit.Builder()
+            .baseUrl("https://api.openweathermap.org/data/2.5/")
+            .client(okHttpClient)
+            .addConverterFactory(json.asConverterFactory("application/json".toMediaType()))
+            .build()
+            .create(WeatherAlertApi::class.java)
     }
 }

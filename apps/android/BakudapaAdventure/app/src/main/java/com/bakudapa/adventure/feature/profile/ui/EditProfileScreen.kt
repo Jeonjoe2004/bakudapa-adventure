@@ -61,8 +61,9 @@ fun EditProfileScreen(
             scope.launch {
                 uploadLoading = true
                 try {
-                    val filename = "profile_${FirebaseAuth.getInstance().currentUser?.uid}_${UUID.randomUUID()}.jpg"
-                    val ref = FirebaseStorage.getInstance().getReference("profiles/$filename")
+                    val uid = FirebaseAuth.getInstance().currentUser?.uid ?: ""
+                    val filename = "${UUID.randomUUID()}.jpg"
+                    val ref = FirebaseStorage.getInstance().getReference("avatars/$uid/$filename")
                     ref.putFile(it).await()
                     val downloadUrl = ref.downloadUrl.await().toString()
                     photoUrl = downloadUrl

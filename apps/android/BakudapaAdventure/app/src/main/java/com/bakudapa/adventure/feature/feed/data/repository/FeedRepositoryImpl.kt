@@ -224,4 +224,26 @@ class FeedRepositoryImpl @Inject constructor(
             DataResult.Error(e)
         }
     }
+
+    override suspend fun repostPost(originalPostId: String, content: String): DataResult<Unit> {
+        return try {
+            val user = auth.currentUser ?: throw Exception("Not authenticated")
+            val originalSnap = firestoreManager.getCollection("posts").document(originalPostId).get().await()
+            val original = originalSnap.toObject(Post::class.java)
+
+            val repost = Post(
+                authorId = user.uid,
+                authorName = user.displayName ?: "Anonymous",
+                authorPhotoUrl = user.photoUrl?.toString(),
+                content = content.ifBlank { original?.content ?: "" },
+                mediaUrl = original?.mediaUrl,
+                mediaType = original?.mediaType,
+                timestamp = System.currentTimeMillis()
+            )
+            firestoreManager.getCollection("posts").add(repost).await()
+            DataResult.Success(Unit)
+        } catch (e: Exception) {
+            DataResult.Error(e)
+        }
+    }
 }

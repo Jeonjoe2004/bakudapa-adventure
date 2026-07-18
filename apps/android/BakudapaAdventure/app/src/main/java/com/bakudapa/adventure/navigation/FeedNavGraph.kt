@@ -25,6 +25,9 @@ fun NavGraphBuilder.feedNavGraph(navController: NavHostController) {
                 },
                 onNavigateToStoryViewer = { userId ->
                     navController.navigate(Screen.StoryViewer.createRoute(userId))
+                },
+                onNavigateToChat = { postId ->
+                    navController.navigate(Screen.Chat.route)
                 }
             )
         }

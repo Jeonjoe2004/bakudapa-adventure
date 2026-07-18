@@ -64,6 +64,7 @@ class HikingService : Service() {
         intent?.let {
             when (it.action) {
                 ACTION_START -> startTracking()
+                ACTION_RESUME -> resumeTracking()
                 ACTION_PAUSE -> pauseTracking()
                 ACTION_STOP  -> stopTracking()
             }
@@ -75,6 +76,12 @@ class HikingService : Service() {
         isTracking = true
         startForeground(NOTIFICATION_ID, buildNotification("0.00 km", "00:00:00"))
         requestLocationUpdates()
+    }
+
+    private fun resumeTracking() {
+        isTracking = true
+        requestLocationUpdates()
+        updateNotification("Melanjutkan tracking...", "--", "--")
     }
 
     private fun pauseTracking() {
@@ -180,6 +187,7 @@ class HikingService : Service() {
         const val NOTIFICATION_ID = 1
         const val CHANNEL_ID     = "hiking_tracking"
         const val ACTION_START   = "ACTION_START"
+        const val ACTION_RESUME  = "ACTION_RESUME"
         const val ACTION_PAUSE   = "ACTION_PAUSE"
         const val ACTION_STOP    = "ACTION_STOP"
     }

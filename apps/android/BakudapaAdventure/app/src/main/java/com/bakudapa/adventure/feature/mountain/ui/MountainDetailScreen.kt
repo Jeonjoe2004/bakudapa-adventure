@@ -20,9 +20,11 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import coil.compose.rememberAsyncImagePainter
 import com.bakudapa.adventure.core.ui.components.ShimmerItem
+import com.bakudapa.adventure.feature.home.ui.components.WeatherCard
 import com.bakudapa.adventure.feature.mountain.domain.model.MountainSection
 import com.bakudapa.adventure.feature.mountain.domain.model.SectionType
 import com.bakudapa.adventure.feature.mountain.domain.model.TrailInfo
+import com.bakudapa.adventure.feature.summit.ui.SummitLogListSection
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -30,6 +32,7 @@ fun MountainDetailScreen(
     onNavigateBack: () -> Unit,
     onNavigateToTrail: (String) -> Unit,
     onNavigateToMap: (Double, Double, String) -> Unit,
+    onNavigateToCreateSummitLog: (String, String) -> Unit = { _, _ -> },
     viewModel: MountainDetailViewModel = hiltViewModel()
 ) {
     val state by viewModel.uiState.collectAsState()
@@ -39,6 +42,7 @@ fun MountainDetailScreen(
             when (effect) {
                 is MountainDetailEffect.NavigateToTrail -> onNavigateToTrail(effect.id)
                 is MountainDetailEffect.NavigateToMap -> onNavigateToMap(effect.lat, effect.lng, effect.name)
+                is MountainDetailEffect.NavigateToCreateSummitLog -> onNavigateToCreateSummitLog(effect.mountainId, effect.mountainName)
                 is MountainDetailEffect.ShowError -> { /* Snackbar */ }
             }
         }
@@ -143,6 +147,35 @@ fun MountainDetailScreen(
                                 }
                             }
                         }
+                    }
+
+                    // Weather
+                    state.weather?.let { weather ->
+                        item {
+                            WeatherCard(weather = weather)
+                        }
+                    }
+
+                    // Summit Log button
+                    item {
+                        Button(
+                            onClick = { viewModel.onEvent(MountainDetailEvent.OnOpenSummitLog) },
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(horizontal = 16.dp, vertical = 8.dp),
+                            colors = ButtonDefaults.buttonColors(
+                                containerColor = MaterialTheme.colorScheme.tertiary
+                            )
+                        ) {
+                            Icon(Icons.Default.Flag, contentDescription = null)
+                            Spacer(Modifier.width(8.dp))
+                            Text("Saya Sampai Puncak! 🏔️")
+                        }
+                    }
+
+                    // Summit logs
+                    item {
+                        SummitLogListSection(mountainId = mountain.id)
                     }
 
                     // Open Map button

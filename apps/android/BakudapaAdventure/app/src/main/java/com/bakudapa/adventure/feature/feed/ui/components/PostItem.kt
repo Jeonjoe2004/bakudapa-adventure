@@ -1,13 +1,14 @@
 package com.bakudapa.adventure.feature.feed.ui.components
 
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material.icons.outlined.*
 import androidx.compose.material3.*
-import androidx.compose.runtime.Composable
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -19,6 +20,7 @@ import com.bakudapa.adventure.feature.feed.domain.model.Post
 import java.text.SimpleDateFormat
 import java.util.*
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun PostItem(
     post: Post,
@@ -26,9 +28,13 @@ fun PostItem(
     onCommentClick: () -> Unit,
     onSaveClick: () -> Unit,
     onShareClick: () -> Unit,
+    onRepostClick: () -> Unit = {},
+    onShareToChatClick: () -> Unit = {},
     onReportClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
+    var showShareSheet by remember { mutableStateOf(false) }
+
     Card(
         modifier = modifier.fillMaxWidth().padding(8.dp),
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
@@ -102,7 +108,7 @@ fun PostItem(
                         }
                         Text(text = post.commentsCount.toString())
                     }
-                    IconButton(onClick = onShareClick) {
+                    IconButton(onClick = { showShareSheet = true }) {
                         Icon(Icons.Outlined.Share, contentDescription = "Share")
                     }
                 }
@@ -114,6 +120,83 @@ fun PostItem(
                     )
                 }
             }
+        }
+    }
+
+    // IG-style Share Bottom Sheet
+    if (showShareSheet) {
+        ModalBottomSheet(
+            onDismissRequest = { showShareSheet = false }
+        ) {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(vertical = 16.dp),
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                ShareOption(
+                    icon = Icons.Default.Repeat,
+                    label = "Bagikan ke Feed",
+                    subtitle = "Posting ulang ke berandamu"
+                ) {
+                    showShareSheet = false
+                    onRepostClick()
+                }
+
+                ShareOption(
+                    icon = Icons.Default.Send,
+                    label = "Kirim ke Chat/DM",
+                    subtitle = "Bagikan ke teman"
+                ) {
+                    showShareSheet = false
+                    onShareToChatClick()
+                }
+
+                HorizontalDivider(modifier = Modifier.padding(horizontal = 24.dp, vertical = 8.dp))
+
+                ShareOption(
+                    icon = Icons.Default.Share,
+                    label = "Bagikan ke Aplikasi Lain",
+                    subtitle = "WhatsApp, Telegram, dll"
+                ) {
+                    showShareSheet = false
+                    onShareClick()
+                }
+            }
+
+            Spacer(modifier = Modifier.height(32.dp))
+        }
+    }
+}
+
+@Composable
+private fun ShareOption(
+    icon: androidx.compose.ui.graphics.vector.ImageVector,
+    label: String,
+    subtitle: String,
+    onClick: () -> Unit
+) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable(onClick = onClick)
+            .padding(horizontal = 24.dp, vertical = 12.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Icon(
+            icon,
+            contentDescription = null,
+            modifier = Modifier.size(28.dp),
+            tint = MaterialTheme.colorScheme.primary
+        )
+        Spacer(Modifier.width(16.dp))
+        Column {
+            Text(label, fontWeight = FontWeight.SemiBold)
+            Text(
+                subtitle,
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.outline
+            )
         }
     }
 }

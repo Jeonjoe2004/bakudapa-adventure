@@ -28,6 +28,8 @@ class FeedViewModel @Inject constructor(
             is FeedEvent.OnSaveClicked -> handleSave(event.postId, event.isSaved)
             is FeedEvent.OnCommentClicked -> sendEffect(FeedEffect.NavigateToComments(event.postId))
             is FeedEvent.OnShareClicked -> handleShare(event.post)
+            is FeedEvent.OnRepostClicked -> handleRepost(event.post)
+            is FeedEvent.OnShareToChatClicked -> sendEffect(FeedEffect.NavigateToChat(event.post.id))
             is FeedEvent.OnReportClicked -> handleReport(event.postId)
             is FeedEvent.OnNewPostContentChanged -> setState { it.copy(newPostContent = event.content) }
             is FeedEvent.OnNewPostMediaSelected -> setState { it.copy(newPostMediaUri = event.uri) }
@@ -63,6 +65,17 @@ class FeedViewModel @Inject constructor(
         viewModelScope.launch {
             repository.reportPost(postId, "Inappropriate content")
             sendEffect(FeedEffect.ShowError("Post reported. Thank you."))
+        }
+    }
+
+    private fun handleRepost(post: com.bakudapa.adventure.feature.feed.domain.model.Post) {
+        viewModelScope.launch {
+            val result = repository.repostPost(post.id, "")
+            if (result is DataResult.Success) {
+                sendEffect(FeedEffect.ShowError("Posting ulang berhasil!"))
+            } else {
+                sendEffect(FeedEffect.ShowError("Gagal posting ulang"))
+            }
         }
     }
 

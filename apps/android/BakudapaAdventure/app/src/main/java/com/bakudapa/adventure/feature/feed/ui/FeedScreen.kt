@@ -23,6 +23,7 @@ fun FeedScreen(
     onNavigateToComments: (String) -> Unit,
     onNavigateToCreatePost: () -> Unit,
     onNavigateToStoryViewer: (String) -> Unit = {},
+    onNavigateToChat: (String) -> Unit = {},
     viewModel: FeedViewModel = hiltViewModel()
 ) {
     val state by viewModel.uiState.collectAsState()
@@ -32,6 +33,7 @@ fun FeedScreen(
         viewModel.effect.collectLatest { effect ->
             when (effect) {
                 is FeedEffect.NavigateToComments -> onNavigateToComments(effect.postId)
+                is FeedEffect.NavigateToChat -> onNavigateToChat(effect.postId)
                 is FeedEffect.ShowError -> snackbarHostState.showSnackbar(effect.message)
                 FeedEffect.PostCreated -> {
                     snackbarHostState.showSnackbar("Post shared!")
@@ -74,6 +76,8 @@ fun FeedScreen(
                             onCommentClick = { viewModel.onEvent(FeedEvent.OnCommentClicked(post.id)) },
                             onSaveClick = { viewModel.onEvent(FeedEvent.OnSaveClicked(post.id, post.isSaved)) },
                             onShareClick = { viewModel.onEvent(FeedEvent.OnShareClicked(post)) },
+                            onRepostClick = { viewModel.onEvent(FeedEvent.OnRepostClicked(post)) },
+                            onShareToChatClick = { viewModel.onEvent(FeedEvent.OnShareToChatClicked(post)) },
                             onReportClick = { viewModel.onEvent(FeedEvent.OnReportClicked(post.id)) }
                         )
                     }

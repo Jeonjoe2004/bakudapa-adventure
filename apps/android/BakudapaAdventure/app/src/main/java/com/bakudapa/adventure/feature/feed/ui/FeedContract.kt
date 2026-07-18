@@ -21,6 +21,8 @@ sealed class FeedEvent : UiEvent {
     data class OnSaveClicked(val postId: String, val isSaved: Boolean) : FeedEvent()
     data class OnCommentClicked(val postId: String) : FeedEvent()
     data class OnShareClicked(val post: Post) : FeedEvent()
+    data class OnRepostClicked(val post: Post) : FeedEvent()
+    data class OnShareToChatClicked(val post: Post) : FeedEvent()
     data class OnReportClicked(val postId: String) : FeedEvent()
     
     // Create Post Events
@@ -31,6 +33,7 @@ sealed class FeedEvent : UiEvent {
 
 sealed class FeedEffect : UiEffect {
     data class NavigateToComments(val postId: String) : FeedEffect()
+    data class NavigateToChat(val postId: String) : FeedEffect()
     data class ShowError(val message: String) : FeedEffect()
     object PostCreated : FeedEffect()
 }

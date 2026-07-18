@@ -15,17 +15,6 @@ class MapViewModel @Inject constructor(
 
     init {
         loadMarkers()
-        loadDownloadedRegions()
-    }
-
-    private fun loadDownloadedRegions() {
-        viewModelScope.launch {
-            (mapRepository as? com.bakudapa.adventure.feature.map.data.repository.MapRepositoryImpl)
-                ?.getDownloadedRegions()
-                ?.collect { regions ->
-                    setState { it.copy(downloadedRegions = regions.toList()) }
-                }
-        }
     }
 
     override fun onEvent(event: MapEvent) {
@@ -40,23 +29,28 @@ class MapViewModel @Inject constructor(
             is MapEvent.OnCompassChanged -> {
                 setState { it.copy(compassAzimuth = event.azimuth) }
             }
-            MapEvent.OnDownloadMapClicked -> {
-                downloadMapRegion("current_area")
-            }
-            is MapEvent.OnDownloadRegion -> {
-                downloadMapRegion(event.regionName)
-            }
             MapEvent.OnToggleOfflineMode -> {
                 val newMode = !uiState.value.isOfflineMode
                 setState { it.copy(isOfflineMode = newMode) }
-                sendEffect(
-                    MapEffect.ShowToast(
-                        if (newMode) "Offline mode ON" else "Offline mode OFF"
-                    )
-                )
+                sendEffect(MapEffect.ShowToast(if (newMode) "Offline mode ON" else "Offline mode OFF"))
             }
             MapEvent.OnToggleCompass -> {
                 setState { it.copy(isCompassEnabled = !it.isCompassEnabled) }
+            }
+            MapEvent.OnToggleFollow -> {
+                setState { it.copy(isFollowing = !it.isFollowing) }
+            }
+            is MapEvent.OnMapTapped -> {
+                setState { it.copy(waypoints = it.waypoints + Pair(event.lat, event.lng)) }
+            }
+            is MapEvent.OnAddWaypoint -> {
+                setState { it.copy(waypoints = it.waypoints + Pair(event.lat, event.lng)) }
+            }
+            MapEvent.OnClearWaypoints -> {
+                setState { it.copy(waypoints = emptyList()) }
+            }
+            is MapEvent.OnRouteToSummit -> {
+                sendEffect(MapEffect.ShowToast("Route to summit coming soon"))
             }
         }
     }
@@ -72,24 +66,6 @@ class MapViewModel @Inject constructor(
                     }
                     DataResult.Loading -> setState { it.copy(isLoading = true) }
                 }
-            }
-        }
-    }
-
-    private fun downloadMapRegion(regionName: String) {
-        viewModelScope.launch {
-            setState { it.copy(isDownloading = true, downloadProgress = 0) }
-            val result = mapRepository.downloadMapRegion(regionName)
-            when (result) {
-                is DataResult.Success -> {
-                    setState { it.copy(isDownloading = false, downloadProgress = 100) }
-                    sendEffect(MapEffect.ShowToast("Map region '$regionName' downloaded"))
-                }
-                is DataResult.Error -> {
-                    setState { it.copy(isDownloading = false) }
-                    sendEffect(MapEffect.ShowToast("Download failed: ${result.exception.message}"))
-                }
-                DataResult.Loading -> {}
             }
         }
     }

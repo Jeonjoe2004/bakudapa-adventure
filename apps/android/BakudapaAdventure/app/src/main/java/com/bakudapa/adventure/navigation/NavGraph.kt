@@ -19,7 +19,9 @@ import com.bakudapa.adventure.feature.mountain.ui.MountainListScreen
 import com.bakudapa.adventure.feature.profile.ui.EditProfileScreen
 import com.bakudapa.adventure.feature.profile.ui.ProfileScreen
 import com.bakudapa.adventure.feature.profile.ui.UserProfileScreen
+import com.bakudapa.adventure.feature.gear.ui.GearChecklistScreen
 import com.bakudapa.adventure.feature.settings.ui.SettingsScreen
+import com.bakudapa.adventure.feature.summit.ui.CreateSummitLogScreen
 import com.bakudapa.adventure.feature.story.ui.StoryViewerScreen
 import com.bakudapa.adventure.feature.trail.ui.TrailDetailScreen
 import com.bakudapa.adventure.feature.trail.ui.TrailUploadScreen
@@ -82,7 +84,27 @@ fun NavGraph(
                 },
                 onNavigateToMap = { lat, lng, name ->
                     navController.navigate(Screen.Map.route)
+                },
+                onNavigateToCreateSummitLog = { mountainId, mountainName ->
+                    navController.navigate(Screen.CreateSummitLog.createRoute(mountainId, mountainName))
                 }
+            )
+        }
+
+        // Create Summit Log
+        composable(
+            route = Screen.CreateSummitLog.route,
+            arguments = listOf(
+                navArgument("mountainId") { type = NavType.StringType },
+                navArgument("mountainName") { type = NavType.StringType }
+            )
+        ) { backStackEntry ->
+            val mountainId = backStackEntry.arguments?.getString("mountainId") ?: return@composable
+            val mountainName = backStackEntry.arguments?.getString("mountainName") ?: ""
+            CreateSummitLogScreen(
+                mountainId = mountainId,
+                mountainName = mountainName,
+                onNavigateBack = { navController.popBackStack() }
             )
         }
 
@@ -178,6 +200,23 @@ fun NavGraph(
         // Trail Upload
         composable(Screen.TrailUpload.route) {
             TrailUploadScreen(
+                onNavigateBack = { navController.popBackStack() }
+            )
+        }
+
+        // Gear Checklist
+        composable(
+            route = Screen.GearChecklist.route,
+            arguments = listOf(
+                navArgument("mountainId") { type = NavType.StringType },
+                navArgument("mountainName") { type = NavType.StringType }
+            )
+        ) { backStackEntry ->
+            val mountainId = backStackEntry.arguments?.getString("mountainId") ?: return@composable
+            val mountainName = backStackEntry.arguments?.getString("mountainName") ?: ""
+            GearChecklistScreen(
+                mountainId = mountainId,
+                mountainName = mountainName,
                 onNavigateBack = { navController.popBackStack() }
             )
         }

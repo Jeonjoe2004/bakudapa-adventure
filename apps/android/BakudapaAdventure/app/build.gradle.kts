@@ -83,6 +83,9 @@ dependencies {
     // DI (Hilt)
     implementation(libs.hilt.android)
     ksp(libs.hilt.compiler)
+    implementation("androidx.hilt:hilt-work:1.2.0")
+    ksp("androidx.hilt:hilt-compiler:1.2.0")
+    implementation("androidx.work:work-runtime-ktx:2.10.0")
 
     // Firebase
     implementation(platform(libs.firebase.bom))
@@ -90,6 +93,7 @@ dependencies {
     implementation(libs.firebase.firestore)
     implementation(libs.firebase.storage)
     implementation(libs.firebase.messaging)
+    implementation("com.google.firebase:firebase-functions")
 
     // Database (Room)
     implementation(libs.androidx.room.runtime)

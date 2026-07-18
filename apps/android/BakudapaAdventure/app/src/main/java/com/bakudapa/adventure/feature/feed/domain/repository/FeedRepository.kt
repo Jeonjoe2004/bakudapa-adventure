@@ -29,4 +29,6 @@ interface FeedRepository {
     suspend fun addComment(postId: String, content: String): DataResult<Unit>
     
     suspend fun reportPost(postId: String, reason: String): DataResult<Unit>
+
+    suspend fun repostPost(originalPostId: String, content: String): DataResult<Unit>
 }

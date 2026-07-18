@@ -38,7 +38,7 @@ service cloud.firestore {
       allow delete: if request.auth != null && resource.data.authorId == request.auth.uid;
     }
 
-    // Posts: authenticated read, owner write, anyone update counters
+    // Posts: authenticated read, owner write, anyone update interaction counters only
     match /posts/{post} {
       allow read: if request.auth != null;
       allow create: if request.auth != null && request.resource.data.authorId == request.auth.uid
@@ -47,9 +47,8 @@ service cloud.firestore {
       allow update: if request.auth != null && (
         // owner can update anything
         resource.data.authorId == request.auth.uid ||
-        // anyone can update interaction counters
-        request.resource.data.keys().hasAll(['likesCount', 'commentsCount'])
-        && request.resource.data.keys().size() == 2
+        // anyone can update only likesCount and commentsCount, nothing else
+        request.resource.data.diff(resource.data).affectedKeys().hasOnly(['likesCount', 'commentsCount'])
       );
     }
 
@@ -123,6 +122,12 @@ service cloud.firestore {
       allow read: if request.auth != null && request.auth.uid == userId;
       allow write: if request.auth != null && request.auth.uid == userId;
     }
+
+    // Summit logs: auth read, verified user create
+    match /summit_logs/{log} {
+      allow read: if request.auth != null;
+      allow create: if request.auth != null && request.resource.data.userId == request.auth.uid;
+      allow delete: if request.auth != null && resource.data.userId == request.auth.uid;
     }
 
     // Default: deny all

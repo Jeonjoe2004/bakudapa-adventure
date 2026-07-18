@@ -1,7 +1,10 @@
 package com.bakudapa.adventure.feature.mountain.data.repository
 
+import com.bakudapa.adventure.BuildConfig
 import com.bakudapa.adventure.core.data.DataResult
 import com.bakudapa.adventure.data.remote.firebase.FirestoreManager
+import com.bakudapa.adventure.feature.home.data.remote.WeatherApi
+import com.bakudapa.adventure.feature.home.domain.model.Weather
 import com.bakudapa.adventure.feature.mountain.domain.model.*
 import com.bakudapa.adventure.feature.mountain.domain.repository.MountainRepository
 import com.google.firebase.firestore.Query
@@ -14,7 +17,8 @@ import javax.inject.Singleton
 
 @Singleton
 class MountainRepositoryImpl @Inject constructor(
-    private val firestoreManager: FirestoreManager
+    private val firestoreManager: FirestoreManager,
+    private val weatherApi: WeatherApi
 ) : MountainRepository {
 
     override fun getMountains(): Flow<DataResult<List<Mountain>>> = callbackFlow {
@@ -92,6 +96,29 @@ class MountainRepositoryImpl @Inject constructor(
                 )
             }
             trySend(DataResult.Success(trails))
+        } catch (e: Exception) {
+            trySend(DataResult.Error(e))
+        }
+        awaitClose()
+    }
+
+    override fun getWeather(lat: Double, lon: Double): Flow<DataResult<Weather>> = callbackFlow {
+        trySend(DataResult.Loading)
+        try {
+            val key = BuildConfig.WEATHER_API_KEY
+            if (key.isBlank() || key == "CHANGE_ME") {
+                trySend(DataResult.Success(Weather(24f, "Cloudy", "", 80, 5f)))
+            } else {
+                val response = weatherApi.getCurrentWeather(lat, lon, key)
+                val weather = Weather(
+                    temperature = response.main.temp,
+                    condition = response.weather.firstOrNull()?.description ?: "Unknown",
+                    iconUrl = "https://openweathermap.org/img/wn/${response.weather.firstOrNull()?.icon}@2x.png",
+                    humidity = response.main.humidity,
+                    windSpeed = response.wind.speed
+                )
+                trySend(DataResult.Success(weather))
+            }
         } catch (e: Exception) {
             trySend(DataResult.Error(e))
         }

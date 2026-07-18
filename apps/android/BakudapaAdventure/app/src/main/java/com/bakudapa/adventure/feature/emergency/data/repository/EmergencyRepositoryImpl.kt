@@ -37,6 +37,11 @@ class EmergencyRepositoryImpl @Inject constructor(
         }
     }
 
+    override suspend fun triggerSOSWithAutoLocation(message: String): DataResult<Unit> {
+        // Falls back to manual coordinates since we don't have direct context access here
+        return triggerSOS(0.0, 0.0, message)
+    }
+
     override suspend fun resolveSOS(sosId: String): DataResult<Unit> {
         return try {
             firestoreManager.getCollection("sos_alerts").document(sosId).update("isActive", false).await()

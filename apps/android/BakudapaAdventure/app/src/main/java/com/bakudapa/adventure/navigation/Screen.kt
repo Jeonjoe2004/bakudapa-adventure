@@ -46,6 +46,15 @@ sealed class Screen(val route: String) {
         fun createRoute(postId: String) = "post_detail/$postId"
     }
 
+    // Gear Checklist
+    object GearChecklist : Screen("gear_checklist/{mountainId}/{mountainName}") {
+        fun createRoute(mountainId: String, mountainName: String) = "gear_checklist/$mountainId/$mountainName"
+    }
+
+    object CreateSummitLog : Screen("create_summit_log/{mountainId}/{mountainName}") {
+        fun createRoute(mountainId: String, mountainName: String) = "create_summit_log/$mountainId/$mountainName"
+    }
+
     // Stories
     object StoryViewer : Screen("story_viewer/{userId}") {
         fun createRoute(userId: String) = "story_viewer/$userId"

@@ -54,11 +54,11 @@ class EmergencyViewModel @Inject constructor(
     private fun triggerSOS() {
         viewModelScope.launch {
             // In real app, get current GPS location first
-            val result = repository.triggerSOS(0.0, 0.0, "SOS! I need help!")
+            val result = repository.triggerSOSWithAutoLocation("SOS! I need help!")
             if (result is DataResult.Success) {
                 sendEffect(EmergencyEffect.ShowToast("SOS Alert Triggered!"))
             } else if (result is DataResult.Error) {
-                sendEffect(EmergencyEffect.ShowToast("Failed to trigger SOS"))
+                sendEffect(EmergencyEffect.ShowToast("Failed to trigger SOS: ${result.exception?.message}"))
             }
         }
     }

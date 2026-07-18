@@ -9,6 +9,9 @@ data class MapState(
     val isLoading: Boolean = false,
     val markers: List<MapMarker> = emptyList(),
     val userLocation: Pair<Double, Double>? = null,
+    val userBearing: Float = 0f,
+    val isFollowing: Boolean = false,
+    val waypoints: List<Pair<Double, Double>> = emptyList(),
     val zoomLevel: Double = 10.0,
     val isCompassEnabled: Boolean = true,
     val compassAzimuth: Float = 0f,
@@ -23,10 +26,13 @@ sealed class MapEvent : UiEvent {
     data class OnMarkerClicked(val markerId: String) : MapEvent()
     data class OnLocationChanged(val lat: Double, val lng: Double) : MapEvent()
     data class OnCompassChanged(val azimuth: Float) : MapEvent()
-    object OnDownloadMapClicked : MapEvent()
-    data class OnDownloadRegion(val regionName: String) : MapEvent()
     object OnToggleOfflineMode : MapEvent()
     object OnToggleCompass : MapEvent()
+    object OnToggleFollow : MapEvent()
+    data class OnMapTapped(val lat: Double, val lng: Double) : MapEvent()
+    data class OnAddWaypoint(val lat: Double, val lng: Double) : MapEvent()
+    object OnClearWaypoints : MapEvent()
+    data class OnRouteToSummit(val mountainLat: Double, val mountainLng: Double) : MapEvent()
 }
 
 sealed class MapEffect : UiEffect {
